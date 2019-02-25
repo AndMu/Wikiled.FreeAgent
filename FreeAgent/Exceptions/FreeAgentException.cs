@@ -1,29 +1,23 @@
 ﻿using System;
-using RestSharp;
 using System.Net;
-using System.Collections.Generic;
+using RestSharp;
 
-namespace FreeAgent.Exceptions
+namespace Wikiled.FreeAgent.Exceptions
 {
     public class FreeAgentException : Exception
     {
-        public HttpStatusCode StatusCode { get; set; }
-        /// <summary>
-        /// The response of the error call (for Debugging use)
-        /// </summary>
-        public IRestResponse Response { get; private set; }
+        public string Errors = "";
 
-        public FreeAgentException() : base()
+        public FreeAgentException()
         {
         }
 
         public FreeAgentException(string message)
             : base(message)
         {
-
         }
 
-        public FreeAgentException(IRestResponse r) : base()
+        public FreeAgentException(IRestResponse r)
         {
             Response = r;
             StatusCode = r.StatusCode;
@@ -35,19 +29,23 @@ namespace FreeAgent.Exceptions
                 {
                     Errors = json;
                 }
-            } catch {
+            }
+            catch
+            {
                 //do nothing
             }
-
         }
 
-        public string Errors = "";
+        /// <summary>
+        ///     The response of the error call (for Debugging use)
+        /// </summary>
+        public IRestResponse Response { get; }
+
+        public HttpStatusCode StatusCode { get; set; }
 
         public override string ToString()
         {
             return string.Format("[FreeAgentException: StatusCode={0}, Response={1}, Content={2}]", StatusCode, Response, Response.Content);
         }
-
     }
-
 }

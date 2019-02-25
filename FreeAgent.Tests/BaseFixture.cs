@@ -1,19 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
+using Wikiled.FreeAgent.Client;
+using Wikiled.FreeAgent.Models;
 
-namespace FreeAgent.Tests
+namespace Wikiled.FreeAgent.Tests
 {
     public class BaseFixture
     {
         protected FreeAgentClient Client;
+
         protected AccessToken Token;
 
         public virtual void Configure()
         {
-
         }
 
         public virtual void SetupClient()
@@ -26,14 +25,13 @@ namespace FreeAgent.Tests
             Client = new FreeAgentClient(KeyStorage.AppKey, KeyStorage.AppSecret);
 
             var sandbox_bttest_token = new AccessToken
-            {
-                access_token = "",
-                refresh_token = KeyStorage.RefreshToken,
-                token_type = "bearer"
-            };
+                                       {
+                                           access_token = "",
+                                           refresh_token = KeyStorage.RefreshToken,
+                                           token_type = "bearer"
+                                       };
 
             Client.CurrentAccessToken = sandbox_bttest_token;
-
 
             Token = Client.RefreshAccessToken();
 

@@ -1,31 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using NUnit.Framework;
+using Wikiled.FreeAgent.Client;
+using Wikiled.FreeAgent.Extensions;
+using Wikiled.FreeAgent.Models;
 
-namespace FreeAgent.Tests
+namespace Wikiled.FreeAgent.Tests
 {
     [TestFixture]
     public class ProjectFixture : ResourceFixture<ProjectWrapper, ProjectsWrapper, Project>
     {
+        public override ResourceClient<ProjectWrapper, ProjectsWrapper, Project> ResourceClient => Client.Project;
 
-        public override ResourceClient<ProjectWrapper, ProjectsWrapper, Project> ResourceClient
+        public override bool CanDelete(Project item)
         {
-            get { return Client.Project; }
+            return item.name.Contains("TEST");
         }
-
 
         public override void CheckSingleItem(Project item)
         {
-
-            Assert.IsNotNullOrEmpty(item.url);
-            Assert.IsNotNullOrEmpty(item.name);
-            Assert.IsNotNullOrEmpty(item.contact);
-            Assert.IsNotNullOrEmpty(item.status);
+            Assert.IsNotEmpty(item.url);
+            Assert.IsNotEmpty(item.name);
+            Assert.IsNotEmpty(item.contact);
+            Assert.IsNotEmpty(item.status);
         }
 
+        public override void CompareSingleItem(Project originalItem, Project newItem)
+        {
+            Assert.IsNotNull(newItem);
+            Assert.IsNotEmpty(newItem.url);
+            Assert.AreEqual(newItem.name, originalItem.name);
+            Assert.AreEqual(newItem.status, originalItem.status);
+            Assert.AreEqual(newItem.budget_units, originalItem.budget_units);
+            Assert.AreEqual(newItem.currency, originalItem.currency);
+        }
 
         public override Project CreateSingleItemForInsert()
         {
@@ -33,38 +40,18 @@ namespace FreeAgent.Tests
 
             Assert.IsNotNull(contact);
 
-
             return new Project
-                       {
-                           url = "",
-                           contact = contact.UrlId(),
-                           name = "project TEST",
-                           status = ProjectStatus.Active,
-                           budget_units = ProjectBudgetUnits.Days,
-                           hours_per_day = 7.5,
-                           billing_period = ProjectBillingPeriod.Day,
-                            normal_billing_rate = 450,
-                           currency = "GBP"
-                       };
-
-        }
-
-        public override void CompareSingleItem(Project originalItem, Project newItem)
-        {
-            Assert.IsNotNull(newItem);
-            Assert.IsNotNullOrEmpty(newItem.url);
-            Assert.AreEqual(newItem.name, originalItem.name);
-            Assert.AreEqual(newItem.status, originalItem.status);
-            Assert.AreEqual(newItem.budget_units, originalItem.budget_units);
-            Assert.AreEqual(newItem.currency, originalItem.currency);
-        }
-
-        public override bool CanDelete(Project item)
-        {
-            return item.name.Contains("TEST");
-
+                   {
+                       url = "",
+                       contact = contact.UrlId(),
+                       name = "project TEST",
+                       status = ProjectStatus.Active,
+                       budget_units = ProjectBudgetUnits.Days,
+                       hours_per_day = 7.5,
+                       billing_period = ProjectBillingPeriod.Day,
+                       normal_billing_rate = 450,
+                       currency = "GBP"
+                   };
         }
     }
-
-
 }

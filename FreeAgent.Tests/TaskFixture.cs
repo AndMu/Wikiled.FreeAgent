@@ -1,84 +1,34 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using NUnit.Framework;
+using Wikiled.FreeAgent.Extensions;
+using Wikiled.FreeAgent.Models;
 
-namespace FreeAgent.Tests
+namespace Wikiled.FreeAgent.Tests
 {
     [TestFixture]
     public class TaskFixture : BaseFixture
     {
-        [SetUp]
-        public void Setup()
-        {
-            SetupClient();
-        }
-
-
-        [Test]
-        public void CanGetTasksForProject()
-        {
-            var project = Client.Project.All().First();
-
-            var tasks = Client.Task.AllByProject(project.Id());
-
-            Assert.IsNotEmpty(tasks);
-
-        }
-
-
-        [Test]
-        public void CanGetSingleTaskForProject()
-        {
-            var project = Client.Project.All().First();
-
-            var tasks = Client.Task.AllByProject(project.Id());
-
-            Assert.IsNotEmpty(tasks);
-
-            foreach(var task in tasks)
-            {
-                var newtask = Client.Task.Get(task.Id());
-                Assert.IsNotNull(newtask);
-                Assert.IsNotNullOrEmpty(newtask.name);
-            }
-        }
-
         [Test]
         public void CanCreateSingleTaskForProject()
         {
             var project = Client.Project.All().First();
 
             var task = new Task
-            {
-                name = "Task TEST " + DateTime.Now.ToString(),
-                is_billable = true,
-                billing_rate = 400,
-                billing_period = TaskBillingPeriod.Day,
-                status = TaskStatus.Active,
-                project=""
-                //project = project.UrlId()
+                       {
+                           name = "Task TEST " + DateTime.Now,
+                           is_billable = true,
+                           billing_rate = 400,
+                           billing_period = TaskBillingPeriod.Day,
+                           status = TaskStatus.Active,
+                           project = ""
 
-            };
+                           //project = project.UrlId()
+                       };
 
             var newtask = Client.Task.Put(task, project.UrlId());
 
             CompareSingleItem(task, newtask);
-          
-        }
-
-        public void CompareSingleItem(Task originalItem, Task newItem)
-        {
-            Assert.IsNotNull(newItem);
-            Assert.IsNotNullOrEmpty(newItem.url);
-     
-            Assert.AreEqual(originalItem.name, newItem.name);
-            Assert.AreEqual(originalItem.billing_period, newItem.billing_period);
-            Assert.AreEqual(originalItem.billing_rate, newItem.billing_rate);
-            Assert.AreEqual(originalItem.status, newItem.status);
-            //Assert.AreEqual(originalItem.project, newItem.project);
         }
 
         [Test]
@@ -100,6 +50,51 @@ namespace FreeAgent.Tests
             }
         }
 
+        [Test]
+        public void CanGetSingleTaskForProject()
+        {
+            var project = Client.Project.All().First();
+
+            var tasks = Client.Task.AllByProject(project.Id());
+
+            Assert.IsNotEmpty(tasks);
+
+            foreach (var task in tasks)
+            {
+                var newtask = Client.Task.Get(task.Id());
+                Assert.IsNotNull(newtask);
+                Assert.IsNotEmpty(newtask.name);
+            }
+        }
+
+        [Test]
+        public void CanGetTasksForProject()
+        {
+            var project = Client.Project.All().First();
+
+            var tasks = Client.Task.AllByProject(project.Id());
+
+            Assert.IsNotEmpty(tasks);
+        }
+
+        public void CompareSingleItem(Task originalItem, Task newItem)
+        {
+            Assert.IsNotNull(newItem);
+            Assert.IsNotEmpty(newItem.url);
+
+            Assert.AreEqual(originalItem.name, newItem.name);
+            Assert.AreEqual(originalItem.billing_period, newItem.billing_period);
+            Assert.AreEqual(originalItem.billing_rate, newItem.billing_rate);
+            Assert.AreEqual(originalItem.status, newItem.status);
+
+            //Assert.AreEqual(originalItem.project, newItem.project);
+        }
+
+        [SetUp]
+        public void Setup()
+        {
+            SetupClient();
+        }
 
         /*
         public override ResourceClient<TaskWrapper, TasksWrapper, Task> ResourceClient
@@ -111,7 +106,7 @@ namespace FreeAgent.Tests
         public override void CheckSingleItem(Task item)
         {
 
-            Assert.IsNotNullOrEmpty(item.url);
+            Assert.IsNotEmpty(item.url);
 
         }
 
@@ -138,7 +133,7 @@ namespace FreeAgent.Tests
         public override void CompareSingleItem(Task originalItem, Task newItem)
         {
             Assert.IsNotNull(newItem);
-            Assert.IsNotNullOrEmpty(newItem.url);
+            Assert.IsNotEmpty(newItem.url);
      
         }
 
@@ -149,6 +144,4 @@ namespace FreeAgent.Tests
 
 */
     }
-
-
 }

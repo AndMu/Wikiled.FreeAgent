@@ -1,27 +1,23 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using RestSharp;
+using Wikiled.FreeAgent.Models;
 
-
-namespace FreeAgent
+namespace Wikiled.FreeAgent.Client
 {
-	public class ContactClient : ResourceClient<ContactWrapper, ContactsWrapper, Contact>
-	{
-		public ContactClient(FreeAgentClient client) : base(client) {}
-		
-		
-		public override void CustomizeAllRequest(RestRequest request)
+    public class ContactClient : ResourceClient<ContactWrapper, ContactsWrapper, Contact>
+    {
+        public ContactClient(FreeAgentClient client)
+            : base(client)
+        {
+        }
+
+        public override string ResourceName => "contacts";
+
+        public override void CustomizeAllRequest(RestRequest request)
         {
             request.AddParameter("view", "active", ParameterType.GetOrPost);
         }
-		
-        public override string ResouceName { get { return "contacts"; } } 
 
-        public override ContactWrapper WrapperFromSingle(Contact single)
-        {
-            return new ContactWrapper { contact = single };
-        }
         public override List<Contact> ListFromWrapper(ContactsWrapper wrapper)
         {
             return wrapper.contacts;
@@ -32,9 +28,9 @@ namespace FreeAgent
             return wrapper.contact;
         }
 
-		
-		
-		
-	}
+        public override ContactWrapper WrapperFromSingle(Contact single)
+        {
+            return new ContactWrapper {contact = single};
+        }
+    }
 }
-

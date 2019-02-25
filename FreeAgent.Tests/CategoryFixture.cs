@@ -1,17 +1,10 @@
-using System;
 using NUnit.Framework;
 
-namespace FreeAgent.Tests
+namespace Wikiled.FreeAgent.Tests
 {
     [TestFixture]
     public class CategoryFixture : BaseFixture
     {
-        [SetUp]
-        public void Setup()
-        {
-            SetupClient();
-        }
-
         [Test]
         public void CanGetListOfCategories()
         {
@@ -20,6 +13,12 @@ namespace FreeAgent.Tests
             Assert.IsNotEmpty(cats.cost_of_sales_categories);
             Assert.IsNotEmpty(cats.general_categories);
             Assert.IsNotEmpty(cats.income_categories);
+        }
+
+        [SetUp]
+        public void Setup()
+        {
+            SetupClient();
         }
 
         /*
@@ -32,7 +31,5 @@ namespace FreeAgent.Tests
             Assert.IsNotEmpty(cats.income_categories);
         }
         */
-
     }
 }
-

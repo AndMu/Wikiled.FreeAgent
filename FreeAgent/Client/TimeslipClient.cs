@@ -1,23 +1,22 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using RestSharp;
+using Wikiled.FreeAgent.Extensions;
+using Wikiled.FreeAgent.Models;
 
-
-namespace FreeAgent
+namespace Wikiled.FreeAgent.Client
 {
     public class TimeslipClient : ResourceClient<TimeslipWrapper, TimeslipsWrapper, Timeslip>
     {
-        public TimeslipClient(FreeAgentClient client) : base(client) {}
+        public TimeslipClient(FreeAgentClient client)
+            : base(client)
+        {
+        }
 
         //need to add in the GET to have a parameter for the date filter
 
-        public override string ResouceName { get { return "timeslips"; } } 
+        public override string ResourceName => "timeslips";
 
-        public override TimeslipWrapper WrapperFromSingle(Timeslip single)
-        {
-            return new TimeslipWrapper { timeslip = single };
-        }
         public override List<Timeslip> ListFromWrapper(TimeslipsWrapper wrapper)
         {
             return wrapper.timeslips;
@@ -28,30 +27,31 @@ namespace FreeAgent
             return wrapper.timeslip;
         }
 
+        public override TimeslipWrapper WrapperFromSingle(Timeslip single)
+        {
+            return new TimeslipWrapper {timeslip = single};
+        }
+
         public List<Timeslip> All(string from_date, string to_date)
         {
-            return All((r) => {
-                r.AddParameter("from_date", from_date, ParameterType.GetOrPost);
-                r.AddParameter("to_date", to_date, ParameterType.GetOrPost);
-            });
-
+            return All(
+                r =>
+                {
+                    r.AddParameter("from_date", from_date, ParameterType.GetOrPost);
+                    r.AddParameter("to_date", to_date, ParameterType.GetOrPost);
+                });
         }
 
         public List<Timeslip> AllRecent()
         {
             DateTime now = DateTime.Now;
 
-
-            return All((r) => {
-                r.AddParameter("from_date", now.AddDays(-20).ModelDate(), ParameterType.GetOrPost);
-                r.AddParameter("to_date", now.ModelDate(), ParameterType.GetOrPost);
-            });
-
+            return All(
+                r =>
+                {
+                    r.AddParameter("from_date", now.AddDays(-20).ModelDate(), ParameterType.GetOrPost);
+                    r.AddParameter("to_date", now.ModelDate(), ParameterType.GetOrPost);
+                });
         }
-
-        
-        
-        
     }
 }
-

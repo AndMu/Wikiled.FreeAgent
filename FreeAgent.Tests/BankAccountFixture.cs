@@ -1,64 +1,47 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using NUnit.Framework;
+using Wikiled.FreeAgent.Client;
+using Wikiled.FreeAgent.Models;
 
-namespace FreeAgent.Tests
+namespace Wikiled.FreeAgent.Tests
 {
     [TestFixture]
     public class BankAccountFixture : ResourceFixture<BankAccountWrapper, BankAccountsWrapper, BankAccount>
     {
+        public override ResourceClient<BankAccountWrapper, BankAccountsWrapper, BankAccount> ResourceClient => Client.BankAccount;
 
-        public override ResourceClient<BankAccountWrapper, BankAccountsWrapper, BankAccount> ResourceClient
+        public override bool CanDelete(BankAccount item)
         {
-            get { return Client.BankAccount; }
+            return item.name.Contains("TEST");
         }
-
 
         public override void CheckSingleItem(BankAccount item)
         {
-
-            Assert.IsNotNullOrEmpty(item.url);
-            Assert.IsNotNullOrEmpty(item.type);
-            Assert.IsNotNullOrEmpty(item.name);
-            Assert.IsNotNullOrEmpty(item.bank_name);
-
-            
-        }
-
-
-        public override BankAccount CreateSingleItemForInsert()
-        {
-            return new BankAccount
-            {
-                url = "",
-                opening_balance = 100,
-                type = BankAccountType.StandardBankAccount,
-                name = "Bank Account TEST " + DateTime.Now.ToString(),
-                bank_name = "Test Bank"
-
-
-            };
-
+            Assert.IsNotEmpty(item.url);
+            Assert.IsNotEmpty(item.type);
+            Assert.IsNotEmpty(item.name);
+            Assert.IsNotEmpty(item.bank_name);
         }
 
         public override void CompareSingleItem(BankAccount originalItem, BankAccount newItem)
         {
             Assert.IsNotNull(newItem);
-            Assert.IsNotNullOrEmpty(newItem.url);
+            Assert.IsNotEmpty(newItem.url);
             Assert.AreEqual(newItem.account_number, originalItem.account_number);
             Assert.AreEqual(newItem.type, originalItem.type);
             Assert.AreEqual(newItem.opening_balance, originalItem.opening_balance);
-
         }
 
-        public override bool CanDelete(BankAccount item)
+        public override BankAccount CreateSingleItemForInsert()
         {
-            return item.name.Contains("TEST");
-
+            return new BankAccount
+                   {
+                       url = "",
+                       opening_balance = 100,
+                       type = BankAccountType.StandardBankAccount,
+                       name = "Bank Account TEST " + DateTime.Now,
+                       bank_name = "Test Bank"
+                   };
         }
-
     }
 }

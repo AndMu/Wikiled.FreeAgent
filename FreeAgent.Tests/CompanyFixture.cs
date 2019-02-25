@@ -1,20 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-
+﻿using System.Collections.Generic;
 using NUnit.Framework;
+using Wikiled.FreeAgent.Models;
 
-namespace FreeAgent.Tests
+namespace Wikiled.FreeAgent.Tests
 {
     [TestFixture]
     public class CompanyFixture : BaseFixture
     {
-        [SetUp]
-        public void Setup()
+        [Test]
+        public void CanGetTaxTimeline()
         {
-            SetupClient();
+            List<TaxTimeline> timeline = Client.Company.TaxTimeline();
+
+            Assert.IsNotNull(timeline);
+            Assert.IsNotEmpty(timeline);
         }
 
         [Test]
@@ -23,17 +22,13 @@ namespace FreeAgent.Tests
             Company company = Client.Company.Single();
 
             Assert.IsNotNull(company);
-            Assert.IsNotNullOrEmpty(company.name);
+            Assert.IsNotEmpty(company.name);
         }
 
-        [Test]
-        public void CanGetTaxTimeline()
+        [SetUp]
+        public void Setup()
         {
-            List<TaxTimeline> timeline = Client.Company.TaxTimeline();
-
-            Assert.IsNotNull(timeline);
-            Assert.IsNotEmpty(timeline);
-
+            SetupClient();
         }
 
         [Test]
@@ -46,9 +41,8 @@ namespace FreeAgent.Tests
 
             foreach (TaxTimeline t in timeline)
             {
-                Assert.IsNotNullOrEmpty(t.description);
+                Assert.IsNotEmpty(t.description);
             }
         }
-
     }
 }

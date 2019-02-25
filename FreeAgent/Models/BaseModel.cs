@@ -1,28 +1,12 @@
-using System;
-
-namespace FreeAgent
+namespace Wikiled.FreeAgent.Models
 {
-	public class BaseModel
-	{
-		public BaseModel()
-		{
-			url = "";
-		}
-		public string url { get; set;}
-		
-	}
-
-    public class UpdatableModel : BaseModel
+    public class BaseModel
     {
-        public UpdatableModel()
+        public BaseModel()
         {
-
-            updated_at = "";
-            created_at = "";
-            
+            url = "";
         }
-        public string updated_at { get; set; }
-        public string created_at { get; set; }
+
+        public string url { get; set; }
     }
 }
-
