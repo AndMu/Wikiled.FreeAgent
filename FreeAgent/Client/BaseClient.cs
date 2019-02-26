@@ -23,14 +23,9 @@ namespace Wikiled.FreeAgent.Client
             var request = new RestRequest(method);
             request.Resource = "v{version}/{resource}" + appendToUrl;
             request.AddParameter("version", Version, ParameterType.UrlSegment);
-            if (string.IsNullOrEmpty(resourceOverride))
-            {
-                request.AddParameter("resource", ResourceName, ParameterType.UrlSegment);
-            }
-            else
-            {
-                request.AddParameter("resource", resourceOverride, ParameterType.UrlSegment);
-            }
+            request.AddParameter("resource",
+                                 string.IsNullOrEmpty(resourceOverride) ? ResourceName : resourceOverride,
+                                 ParameterType.UrlSegment);
 
             SetAuthentication(request);
 

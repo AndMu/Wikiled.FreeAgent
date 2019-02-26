@@ -300,13 +300,13 @@ namespace Wikiled.FreeAgent.Client
             var response = _restClient.Execute<T>(request);
             if (!IsSuccess(response.StatusCode))
             {
-                Console.WriteLine((string)response.Content);
+                Console.WriteLine(response.Content);
                 throw new FreeAgentException(response);
             }
 
             if (response.Data == null)
             {
-                Console.WriteLine((string)"{0} returned null", (object)_restClient.BuildUri(request));
+                Console.WriteLine("{0} returned null", _restClient.BuildUri(request));
             }
 
             return response.Data;
