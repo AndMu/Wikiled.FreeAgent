@@ -1,22 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Wikiled.FreeAgent.Client;
 using Wikiled.FreeAgent.Models;
 
 namespace Wikiled.FreeAgent.TestApp
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static async System.Threading.Tasks.Task Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
             FreeAgentClient.UseSandbox = true;
-            var auth = client.BuildAuthorizeUrl();
-            //Process.Start("cmd " + auth);
-           
-            string code = client.ExtractCodeFromUrl("https://developers.google.com/oauthplayground/?code=1GnXmdmCuGE092uyYiHsrz_1Wxit5u-GPcQA2oiQy&state=foo");
-            var newToken = client.GetAccessToken(code, null);
+            var client = new FreeAgentClient(KeyStorage.AppKey, KeyStorage.AppSecret);
+            var helper = new OAuthHelper(new Logger<OAuthHelper>(new LoggerFactory()));
+            helper.StartService();
+            var auth = client.BuildAuthorizeUrl(helper.RedirectUri);
+            await helper.Start(auth).ConfigureAwait(false);
+            var newToken = client.GetAccessToken(helper.Code, null);
             //client.BankTransactionExplanation.All();
             List<TaxTimeline> timeline = client.Company.TaxTimeline();
         }

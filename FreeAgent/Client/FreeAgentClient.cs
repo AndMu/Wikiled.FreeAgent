@@ -19,7 +19,7 @@ namespace Wikiled.FreeAgent.Client
         /// <returns></returns>
         public AccessToken GetAccessToken(string code, string redirectUri = "")
         {
-            _restClient.BaseUrl = new Uri(BaseUrl);
+            restClient.BaseUrl = new Uri(BaseUrl);
             var request = Helper.CreateAccessTokenRequest(code, redirectUri);
             var response = Execute<AccessToken>(request);
 
@@ -33,7 +33,7 @@ namespace Wikiled.FreeAgent.Client
 
         public AccessToken RefreshAccessToken()
         {
-            _restClient.BaseUrl = new Uri(BaseUrl);
+            restClient.BaseUrl = new Uri(BaseUrl);
 
             var request = Helper.CreateRefreshTokenRequest();
             var response = Execute<AccessToken>(request);
@@ -60,9 +60,9 @@ namespace Wikiled.FreeAgent.Client
 
         public static WebProxy Proxy = null;
 
-        private readonly string _apiKey;
+        private readonly string apiKey;
 
-        private readonly string _appsecret;
+        private readonly string appsecret;
 
         /// <summary>
         ///     To use Dropbox API in sandbox mode (app folder access) set to true
@@ -97,9 +97,11 @@ namespace Wikiled.FreeAgent.Client
 
         public UserClient User;
 
-        private AccessToken _currentAccessToken;
+        private AccessToken currentAccessToken;
 
-        private RestClient _restClient, _restClientModified;
+        private RestClient restClient;
+
+        private RestClient restClientModified;
 
         /// <summary>
         ///     Default Constructor for the DropboxClient
@@ -108,9 +110,8 @@ namespace Wikiled.FreeAgent.Client
         /// <param name="appSecret">The Api Secret to use for the Dropbox Requests</param>
         public FreeAgentClient(string apiKey, string appSecret)
         {
-            _apiKey = apiKey;
-            _appsecret = appSecret;
-
+            this.apiKey = apiKey;
+            appsecret = appSecret;
             LoadClient();
         }
 
@@ -123,8 +124,8 @@ namespace Wikiled.FreeAgent.Client
         /// <param name="userSecret">The Users matching secret</param>
         public FreeAgentClient(string apiKey, string appSecret, AccessToken savedToken)
         {
-            _apiKey = apiKey;
-            _appsecret = appSecret;
+            this.apiKey = apiKey;
+            appsecret = appSecret;
             CurrentAccessToken = savedToken;
 
             LoadClient();
@@ -138,13 +139,13 @@ namespace Wikiled.FreeAgent.Client
 
         public AccessToken CurrentAccessToken
         {
-            get => _currentAccessToken;
+            get => currentAccessToken;
             set
             {
-                _currentAccessToken = value;
+                currentAccessToken = value;
                 if (Helper != null)
                 {
-                    Helper.CurrentAccessToken = _currentAccessToken;
+                    Helper.CurrentAccessToken = currentAccessToken;
                 }
             }
         }
@@ -165,7 +166,7 @@ namespace Wikiled.FreeAgent.Client
         public string BuildAuthorizeUrl(string callback = null)
         {
             //Go 1-Liner!
-            return $"{BaseUrl}/v{Version}/approve_app?response_type=code&client_id={_apiKey}{(string.IsNullOrEmpty(callback) ? string.Empty : "&redirect_uri=" + callback.UrlEncode())}&state=foo";
+            return $"{BaseUrl}/v{Version}/approve_app?response_type=code&client_id={apiKey}{(string.IsNullOrEmpty(callback) ? string.Empty : "&redirect_uri=" + callback.UrlEncode())}&state=foo";
         }
 
         public string ExtractCodeFromUrl(string url)
@@ -189,12 +190,12 @@ namespace Wikiled.FreeAgent.Client
 
         public void SetProxy()
         {
-            _restClient.Proxy = Proxy;
+            restClient.Proxy = Proxy;
         }
 
         protected void ExecuteAsync(IRestRequest request, Action<IRestResponse> success, Action<FreeAgentException> failure)
         {
-            _restClient.ExecuteAsync(
+            restClient.ExecuteAsync(
                 request,
                 (response, asynchandler) =>
                 {
@@ -211,7 +212,7 @@ namespace Wikiled.FreeAgent.Client
 
         protected void ExecuteAsync<T>(IRestRequest request, Action<T> success, Action<FreeAgentException> failure) where T : new()
         {
-            _restClient.ExecuteAsync<T>(
+            restClient.ExecuteAsync<T>(
                 request,
                 (response, asynchandler) =>
                 {
@@ -228,12 +229,12 @@ namespace Wikiled.FreeAgent.Client
 
         private Task<T> ExecuteTask<T>(IRestRequest request) where T : new()
         {
-            return RestClientExtensions.ExecuteTask<T>(_restClient, request);
+            return RestClientExtensions.ExecuteTask<T>(restClient, request);
         }
 
         private Task<IRestResponse> ExecuteTask(IRestRequest request)
         {
-            return RestClientExtensions.ExecuteTask(_restClient, request);
+            return RestClientExtensions.ExecuteTask(restClient, request);
         }
 
         private bool IsSuccess(HttpStatusCode code)
@@ -246,13 +247,13 @@ namespace Wikiled.FreeAgent.Client
 
         private void LoadClient()
         {
-            _restClient = new RestClient(BaseUrl);
-            _restClient.ClearHandlers();
-            _restClient.AddHandler("application/json", new JsonDeserializer());
+            restClient = new RestClient(BaseUrl);
+            restClient.ClearHandlers();
+            restClient.AddHandler("application/json", new JsonDeserializer());
 
             Helper = new RequestHelper(Version);
-            Helper.ApiKey = _apiKey;
-            Helper.ApiSecret = _appsecret;
+            Helper.ApiKey = apiKey;
+            Helper.ApiSecret = appsecret;
 
             SetProxy();
 
@@ -297,7 +298,7 @@ namespace Wikiled.FreeAgent.Client
         {
             SetProxy();
 
-            var response = _restClient.Execute<T>(request);
+            var response = restClient.Execute<T>(request);
             if (!IsSuccess(response.StatusCode))
             {
                 Console.WriteLine(response.Content);
@@ -306,7 +307,7 @@ namespace Wikiled.FreeAgent.Client
 
             if (response.Data == null)
             {
-                Console.WriteLine("{0} returned null", _restClient.BuildUri(request));
+                Console.WriteLine("{0} returned null", restClient.BuildUri(request));
             }
 
             return response.Data;
@@ -316,7 +317,7 @@ namespace Wikiled.FreeAgent.Client
         {
             IRestResponse response;
 
-            response = _restClient.Execute(request);
+            response = restClient.Execute(request);
 
             if (!IsSuccess(response.StatusCode))
             {

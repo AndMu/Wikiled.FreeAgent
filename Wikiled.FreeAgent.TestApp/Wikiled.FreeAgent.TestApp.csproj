@@ -3,7 +3,13 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.2</TargetFramework>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Wikiled.Common.Utilities" Version="1.1.11" />
+    <PackageReference Include="Wikiled.Console" Version="1.3.19" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\FreeAgent\Wikiled.FreeAgent.csproj" />
