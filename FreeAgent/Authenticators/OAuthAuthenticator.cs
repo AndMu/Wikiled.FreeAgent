@@ -17,7 +17,7 @@ namespace Wikiled.FreeAgent.Authenticators
 
         private const string SignatureKey = "oauth_signature";
 
-        private const string SignatureMethod = "PLAINTEXT";
+        private const string SignatureMethodDefault = "PLAINTEXT";
 
         private const string SignatureMethodKey = "oauth_signature_method";
 
@@ -32,15 +32,15 @@ namespace Wikiled.FreeAgent.Authenticators
         private const string VersionKey = "oauth_version";
 
         // Fields
-        private readonly string _baseUrl;
+        private readonly string baseUrl;
 
-        private readonly string _consumerKey;
+        private readonly string consumerKey;
 
-        private readonly string _consumerSecret;
+        private readonly string consumerSecret;
 
-        private readonly string _token;
+        private readonly string token;
 
-        private readonly string _tokenSecret;
+        private readonly string tokenSecret;
 
         private static readonly Random Random = new Random();
 
@@ -50,13 +50,15 @@ namespace Wikiled.FreeAgent.Authenticators
         {
         }
 
+        public string SignatureMethod { get; set; } = SignatureMethodDefault;
+
         public OAuthAuthenticator(string baseUrl, string consumerKey, string consumerSecret, string token, string tokenSecret)
         {
-            _baseUrl = baseUrl;
-            _consumerKey = consumerKey;
-            _consumerSecret = consumerSecret;
-            _token = token;
-            _tokenSecret = tokenSecret;
+            this.baseUrl = baseUrl;
+            this.consumerKey = consumerKey;
+            this.consumerSecret = consumerSecret;
+            this.token = token;
+            this.tokenSecret = tokenSecret;
         }
 
         public void Authenticate(IRestClient client, IRestRequest request)
@@ -64,11 +66,11 @@ namespace Wikiled.FreeAgent.Authenticators
             if (request.Method == Method.PUT)
             {
                 //Do the parameters as URL segments for PUT
-                request.AddParameter("oauth_consumer_key", _consumerKey, ParameterType.UrlSegment);
+                request.AddParameter("oauth_consumer_key", consumerKey, ParameterType.UrlSegment);
                 request.AddParameter("oauth_nonce", GenerateNonce(), ParameterType.UrlSegment);
-                if (!string.IsNullOrEmpty(_token))
+                if (!string.IsNullOrEmpty(token))
                 {
-                    request.AddParameter("oauth_token", _token, ParameterType.UrlSegment);
+                    request.AddParameter("oauth_token", token, ParameterType.UrlSegment);
                 }
 
                 request.AddParameter("oauth_timestamp", GenerateTimeStamp(), ParameterType.UrlSegment);
@@ -83,10 +85,10 @@ namespace Wikiled.FreeAgent.Authenticators
                 request.AddParameter("oauth_nonce", GenerateNonce());
                 request.AddParameter("oauth_timestamp", GenerateTimeStamp());
                 request.AddParameter("oauth_signature_method", SignatureMethod);
-                request.AddParameter("oauth_consumer_key", _consumerKey);
-                if (!string.IsNullOrEmpty(_token))
+                request.AddParameter("oauth_consumer_key", consumerKey);
+                if (!string.IsNullOrEmpty(token))
                 {
-                    request.AddParameter("oauth_token", _token);
+                    request.AddParameter("oauth_token", token);
                 }
 
                 request.Parameters.Sort(new QueryParameterComparer());
@@ -147,17 +149,18 @@ namespace Wikiled.FreeAgent.Authenticators
         private Uri BuildUri(IRestRequest request)
         {
             string resource = request.Resource;
-            resource = request.Parameters.Where(delegate(Parameter p) { return p.Type == ParameterType.UrlSegment; }).Aggregate(
-                resource,
-                delegate(string current, Parameter p) { return current.Replace("{" + p.Name + "}", p.Value.ToString().UrlEncode()); });
-            return new Uri(string.Format("{0}/{1}", _baseUrl, resource));
+            resource = request.Parameters.Where(delegate(Parameter p) { return p.Type == ParameterType.UrlSegment; })
+                .Aggregate(
+                    resource,
+                    (current, p) => current.Replace("{" + p.Name + "}", p.Value.ToString().UrlEncode()));
+            return new Uri($"{baseUrl}/{resource}");
         }
 
         private string GenerateSignature(IRestRequest request)
         {
             if (SignatureMethod == "PLAINTEXT")
             {
-                return _consumerSecret + "&" + _tokenSecret;
+                return consumerSecret + "&" + tokenSecret;
             }
 
             Uri uri = BuildUri(request);
@@ -178,14 +181,7 @@ namespace Wikiled.FreeAgent.Authenticators
             string data = builder.ToString();
             var hashAlgorithm = new HMACSHA1
                                 {
-                                    Key =
-                                        Encoding.UTF8.GetBytes(
-                                            string.Format(
-                                                "{0}&{1}",
-                                                _consumerSecret.UrlEncode(),
-                                                string.IsNullOrEmpty(_tokenSecret)
-                                                    ? string.Empty
-                                                    : _tokenSecret.UrlEncode()))
+                                    Key = Encoding.UTF8.GetBytes($"{consumerSecret.UrlEncode()}&{(string.IsNullOrEmpty(tokenSecret) ? string.Empty : tokenSecret.UrlEncode())}")
                                 };
             return ComputeHash(hashAlgorithm, data);
         }

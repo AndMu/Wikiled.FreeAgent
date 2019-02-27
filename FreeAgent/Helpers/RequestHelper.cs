@@ -19,9 +19,9 @@ namespace Wikiled.FreeAgent.Helpers
 
         public string ApiSecret { private get; set; }
 
-        public AccessToken CurrentAccessToken { get; set; }
+        public AccessTokenData CurrentAccessToken { get; set; }
 
-        public RestRequest CreateAccessTokenRequest(string code, string callbackurl = "")
+        public RestRequest CreateAccessTokenRequest(string code, string callback = "")
         {
             // grant_type=authorization_code
             // code=<the code from the url>
@@ -34,9 +34,9 @@ namespace Wikiled.FreeAgent.Helpers
             request.AddParameter("grant_type", "authorization_code", ParameterType.GetOrPost);
             request.AddParameter("client_id", ApiKey, ParameterType.GetOrPost);
             request.AddParameter("client_secret", ApiSecret, ParameterType.GetOrPost);
-            if (!string.IsNullOrEmpty(callbackurl))
+            if (!string.IsNullOrEmpty(callback))
             {
-                request.AddParameter("redirect_uri", callbackurl, ParameterType.GetOrPost);
+                request.AddParameter("redirect_uri", callback, ParameterType.GetOrPost);
             }
 
             return request;
@@ -54,7 +54,7 @@ namespace Wikiled.FreeAgent.Helpers
             request.AddParameter("grant_type", "refresh_token", ParameterType.GetOrPost);
             request.AddParameter("client_id", ApiKey, ParameterType.GetOrPost);
             request.AddParameter("client_secret", ApiSecret, ParameterType.GetOrPost);
-            request.AddParameter("refresh_token", CurrentAccessToken.refresh_token, ParameterType.GetOrPost);
+            request.AddParameter("refresh_token", CurrentAccessToken.RefreshToken, ParameterType.GetOrPost);
 
             return request;
         }

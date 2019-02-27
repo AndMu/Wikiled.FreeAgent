@@ -39,7 +39,7 @@ namespace Wikiled.FreeAgent.Client
 
         protected void SetAuthentication(RestRequest request)
         {
-            request.AddHeader("Authorization", "Bearer " + Client.CurrentAccessToken.access_token);
+            request.AddHeader("Authorization", "Bearer " + Client.CurrentAccessToken.AccessToken);
         }
     }
 }

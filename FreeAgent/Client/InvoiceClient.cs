@@ -76,7 +76,9 @@ namespace Wikiled.FreeAgent.Client
             var response = Client.Execute(request);
 
             if (response != null)
+            {
                 return response.StatusCode == HttpStatusCode.OK;
+            }
 
             return false;
         }
@@ -92,7 +94,9 @@ namespace Wikiled.FreeAgent.Client
             var response = Client.Execute(request);
 
             if (response != null)
+            {
                 return response.StatusCode == HttpStatusCode.OK;
+            }
 
             return false;
         }
@@ -104,12 +108,14 @@ namespace Wikiled.FreeAgent.Client
             request.RequestFormat = DataFormat.Json;
 
             request.AddUrlSegment("id", invoiceId);
-            request.AddBody(new InvoiceEmailWrapper {invoice = email});
+            request.AddJsonBody(new InvoiceEmailWrapper {invoice = email});
 
             var response = Client.Execute(request);
 
             if (response != null)
+            {
                 return response.StatusCode == HttpStatusCode.OK;
+            }
 
             return false;
         }

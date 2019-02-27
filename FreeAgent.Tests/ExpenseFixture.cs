@@ -15,16 +15,11 @@ namespace Wikiled.FreeAgent.Tests
         public override bool CanDelete(Expense item)
         {
             return false;
-            return item.description.Contains("TEST");
         }
 
         public override void CheckSingleItem(Expense item)
         {
             Assert.IsNotEmpty(item.url);
-
-            //Assert.IsNotEmpty(contact.organisation_name);
-            //Assert.IsNotEmpty(contact.first_name);
-            //Assert.IsNotEmpty(contact.last_name);
         }
 
         public override void CompareSingleItem(Expense originalItem, Expense newItem)

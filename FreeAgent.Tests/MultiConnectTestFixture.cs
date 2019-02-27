@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Microsoft.Extensions.Logging.Abstractions;
+using NUnit.Framework;
 using Wikiled.FreeAgent.Client;
 using Wikiled.FreeAgent.Models;
 
@@ -8,7 +9,7 @@ namespace Wikiled.FreeAgent.Tests
     {
         protected FreeAgentClient Client, LiveClient;
 
-        protected AccessToken Token;
+        protected AccessTokenData Token;
 
         public virtual void Configure()
         {
@@ -25,15 +26,15 @@ namespace Wikiled.FreeAgent.Tests
         {
             FreeAgentClient.UseSandbox = true;
 
-            var sandbox_bttest_token = new AccessToken
+            var sandbox_bttest_token = new AccessTokenData
                                        {
-                                           access_token = "",
-                                           refresh_token = KeyStorage.RefreshToken,
-                                           token_type = "bearer"
+                                           AccessToken = "",
+                                           RefreshToken = KeyStorage.RefreshToken,
+                                           TokenType = "bearer"
                                        };
 
             {
-                var Client = new FreeAgentClient(KeyStorage.AppKey, KeyStorage.AppSecret);
+                var Client = new FreeAgentClient(new NullLogger<FreeAgentClient>(), KeyStorage.AppKey, KeyStorage.AppSecret);
 
                 Client.CurrentAccessToken = sandbox_bttest_token;
 
@@ -48,7 +49,7 @@ namespace Wikiled.FreeAgent.Tests
 
             FreeAgentClient.UseSandbox = false;
 
-            var LiveClient = new FreeAgentClient(KeyStorage.AppKey, KeyStorage.AppSecret);
+            var LiveClient = new FreeAgentClient(new NullLogger<FreeAgentClient>(), KeyStorage.AppKey, KeyStorage.AppSecret);
 
             LiveClient.CurrentAccessToken = sandbox_bttest_token;
 

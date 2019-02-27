@@ -41,7 +41,7 @@ namespace Wikiled.FreeAgent.Client
             while (true)
             {
                 var request = CreateAllRequest();
-                if (customizeRequest != null) customizeRequest(request);
+                customizeRequest?.Invoke(request);
 
                 AddPaging(request, page);
 
@@ -65,8 +65,6 @@ namespace Wikiled.FreeAgent.Client
 
                 page++;
             }
-
-            return null;
         }
 
         public void Delete(string id)
@@ -145,7 +143,7 @@ namespace Wikiled.FreeAgent.Client
             request.RequestFormat = DataFormat.Json;
 
             if (!isNewRecord) request.AddParameter("id", item.Id(), ParameterType.UrlSegment);
-            request.AddBody(WrapperFromSingle(item));
+            request.AddJsonBody(WrapperFromSingle(item));
 
             return request;
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using Microsoft.Extensions.Logging.Abstractions;
 using Wikiled.FreeAgent.Client;
 using Wikiled.FreeAgent.Models;
 
@@ -9,7 +10,7 @@ namespace Wikiled.FreeAgent.Tests
     {
         protected FreeAgentClient Client;
 
-        protected AccessToken Token;
+        protected AccessTokenData Token;
 
         public virtual void Configure()
         {
@@ -22,20 +23,20 @@ namespace Wikiled.FreeAgent.Tests
             FreeAgentClient.UseSandbox = KeyStorage.UseSandbox;
             if (KeyStorage.UseProxy) FreeAgentClient.Proxy = new WebProxy("127.0.0.1", 8888);
 
-            Client = new FreeAgentClient(KeyStorage.AppKey, KeyStorage.AppSecret);
+            Client = new FreeAgentClient(new NullLogger<FreeAgentClient>(), KeyStorage.AppKey, KeyStorage.AppSecret);
 
-            var sandbox_bttest_token = new AccessToken
+            var sandbox_bttest_token = new AccessTokenData
                                        {
-                                           access_token = "",
-                                           refresh_token = KeyStorage.RefreshToken,
-                                           token_type = "bearer"
+                                           AccessToken = "",
+                                           RefreshToken = KeyStorage.RefreshToken,
+                                           TokenType = "bearer"
                                        };
 
             Client.CurrentAccessToken = sandbox_bttest_token;
 
             Token = Client.RefreshAccessToken();
 
-            if (Token == null || string.IsNullOrEmpty(Token.access_token) || string.IsNullOrEmpty(Token.refresh_token))
+            if (Token == null || string.IsNullOrEmpty(Token.AccessToken) || string.IsNullOrEmpty(Token.RefreshToken))
             {
                 throw new Exception("Could not setup the Token");
             }
