@@ -99,7 +99,7 @@ namespace Wikiled.FreeAgent.Client
         {
             restClient.BaseUrl = new Uri(BaseUrl);
 
-            var request = Helper.CreateRefreshTokenRequest();
+            var request = Helper.CreateRefreshTokenRequest(token);
             var response = await Execute<AccessTokenData>(request).ConfigureAwait(false);
 
             if (response != null && !string.IsNullOrEmpty(response.AccessToken))

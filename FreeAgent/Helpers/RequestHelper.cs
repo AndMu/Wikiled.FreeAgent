@@ -43,7 +43,7 @@ namespace Wikiled.FreeAgent.Helpers
             return request;
         }
 
-        public RestRequest CreateRefreshTokenRequest()
+        public RestRequest CreateRefreshTokenRequest(AccessTokenData token)
         {
             // grant_type=authorization_code
             // code=<the code from the url>
@@ -55,7 +55,7 @@ namespace Wikiled.FreeAgent.Helpers
             request.AddParameter("grant_type", "refresh_token", ParameterType.GetOrPost);
             request.AddParameter("client_id", ApiKey, ParameterType.GetOrPost);
             request.AddParameter("client_secret", ApiSecret, ParameterType.GetOrPost);
-            request.AddParameter("refresh_token", CurrentAccessToken.RefreshToken, ParameterType.GetOrPost);
+            request.AddParameter("refresh_token", token.RefreshToken, ParameterType.GetOrPost);
 
             return request;
         }
