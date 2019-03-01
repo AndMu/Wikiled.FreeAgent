@@ -1,5 +1,5 @@
 using System;
-using System.Linq;
+using System.Reactive.Linq;
 using NUnit.Framework;
 using Wikiled.FreeAgent.Extensions;
 using Wikiled.FreeAgent.Models;
@@ -10,9 +10,9 @@ namespace Wikiled.FreeAgent.Tests
     public class TaskFixture : BaseFixture
     {
         [Test]
-        public void CanCreateSingleTaskForProject()
+        public async System.Threading.Tasks.Task CanCreateSingleTaskForProject()
         {
-            var project = Client.Project.All().First();
+            var project = await Client.Project.All().FirstAsync();
 
             var task = new Task
                        {
@@ -26,17 +26,17 @@ namespace Wikiled.FreeAgent.Tests
                            //project = project.UrlId()
                        };
 
-            var newtask = Client.Task.Put(task, project.UrlId());
+            var newTask = await Client.Task.Put(task, project.UrlId()).ConfigureAwait(false);
 
-            CompareSingleItem(task, newtask);
+            CompareSingleItem(task, newTask);
         }
 
         [Test]
-        public void CanDeleteAndCleanup()
+        public async System.Threading.Tasks.Task CanDeleteAndCleanup()
         {
-            var project = Client.Project.All().First();
+            var project = await Client.Project.All().FirstAsync();
 
-            var tasks = Client.Task.AllByProject(project.Id());
+            var tasks = await Client.Task.AllByProject(project.Id()).ToArray();
 
             foreach (var item in tasks)
             {
@@ -51,28 +51,28 @@ namespace Wikiled.FreeAgent.Tests
         }
 
         [Test]
-        public void CanGetSingleTaskForProject()
+        public async System.Threading.Tasks.Task CanGetSingleTaskForProject()
         {
-            var project = Client.Project.All().First();
+            var project = await Client.Project.All().FirstAsync();
 
-            var tasks = Client.Task.AllByProject(project.Id());
+            var tasks = await Client.Task.AllByProject(project.Id()).ToArray();
 
             Assert.IsNotEmpty(tasks);
 
             foreach (var task in tasks)
             {
-                var newtask = Client.Task.Get(task.Id());
-                Assert.IsNotNull(newtask);
-                Assert.IsNotEmpty(newtask.name);
+                var newTask = await Client.Task.Get(task.Id()).ConfigureAwait(false);
+                Assert.IsNotNull(newTask);
+                Assert.IsNotEmpty(newTask.name);
             }
         }
 
         [Test]
-        public void CanGetTasksForProject()
+        public async System.Threading.Tasks.Task CanGetTasksForProject()
         {
-            var project = Client.Project.All().First();
+            var project = await Client.Project.All().FirstAsync();
 
-            var tasks = Client.Task.AllByProject(project.Id());
+            var tasks = await Client.Task.AllByProject(project.Id()).ToArray();
 
             Assert.IsNotEmpty(tasks);
         }
@@ -86,62 +86,12 @@ namespace Wikiled.FreeAgent.Tests
             Assert.AreEqual(originalItem.billing_period, newItem.billing_period);
             Assert.AreEqual(originalItem.billing_rate, newItem.billing_rate);
             Assert.AreEqual(originalItem.status, newItem.status);
-
-            //Assert.AreEqual(originalItem.project, newItem.project);
         }
 
         [SetUp]
-        public void Setup()
+        public async System.Threading.Tasks.Task Setup()
         {
-            SetupClient();
+            await SetupClient().ConfigureAwait(false);
         }
-
-        /*
-        public override ResourceClient<TaskWrapper, TasksWrapper, Task> ResourceClient
-        {
-            get { return Client.Task; }
-        }
-
-
-        public override void CheckSingleItem(Task item)
-        {
-
-            Assert.IsNotEmpty(item.url);
-
-        }
-
-
-        public override Task CreateSigleItemForInsert()
-        {
-            var project = Client.Project.All().First();
-
-            Assert.IsNotNull(project);
-
-            //find a project for this contact
-
-            return new Task {
-                name = "Task TEST",
-                is_billable = true,
-                billing_rate = 400,
-                billing_period = TaskBillingPeriod.Day,
-                status = TaskStatus.Active,
-                project = project.UrlId()
-            };
-
-        }
-
-        public override void CompareSingleItem(Task originalItem, Task newItem)
-        {
-            Assert.IsNotNull(newItem);
-            Assert.IsNotEmpty(newItem.url);
-     
-        }
-
-        public override bool CanDelete(Task item)
-        {
-            return (item.name.Contains("TEST"));
-        }
-
-*/
     }
 }

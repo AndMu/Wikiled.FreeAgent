@@ -1,5 +1,6 @@
-using System.Collections.Generic;
 using RestSharp;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Wikiled.FreeAgent.Models;
 
 namespace Wikiled.FreeAgent.Client
@@ -13,14 +14,11 @@ namespace Wikiled.FreeAgent.Client
 
         public override string ResourceName => "accounting";
 
-        public List<TrialBalanceSummary> TrialBalanceSummary()
+        public async Task<List<TrialBalanceSummary>> TrialBalanceSummary()
         {
-            var request = CreateBasicRequest(Method.GET, "/trial_balance/summary");
-            var response = Client.Execute<TrialBalanceSummaryWrapper>(request);
-
-            if (response != null) return response.trial_balance_summary;
-
-            return null;
+            RestRequest request = CreateBasicRequest(Method.GET, "/trial_balance/summary");
+            TrialBalanceSummaryWrapper response = await Client.Execute<TrialBalanceSummaryWrapper>(request).ConfigureAwait(false);
+            return response?.trial_balance_summary;
         }
     }
 }

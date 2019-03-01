@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
+using Wikiled.FreeAgent.Auth;
 using Wikiled.FreeAgent.Client;
 using Wikiled.FreeAgent.Models;
 

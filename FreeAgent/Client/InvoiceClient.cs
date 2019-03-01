@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using RestSharp;
 using Wikiled.FreeAgent.Models;
 
@@ -34,17 +36,17 @@ namespace Wikiled.FreeAgent.Client
             return new InvoiceWrapper {invoice = single};
         }
 
-        public List<Invoice> AllForContact(string contactId)
+        public IObservable<Invoice> AllForContact(string contactId)
         {
             return All(r => { r.AddParameter("contact", contactId, ParameterType.GetOrPost); });
         }
 
-        public List<Invoice> AllForProject(string projectId)
+        public IObservable<Invoice> AllForProject(string projectId)
         {
             return All(r => { r.AddParameter("project", projectId, ParameterType.GetOrPost); });
         }
 
-        public List<Invoice> AllWithFilter(string filter)
+        public IObservable<Invoice> AllWithFilter(string filter)
         {
             return All(r => { r.AddParameter("view", filter, ParameterType.GetOrPost); });
         }

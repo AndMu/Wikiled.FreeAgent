@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wikiled.FreeAgent.Client;
 using Wikiled.FreeAgent.Extensions;
 using Wikiled.FreeAgent.Models;
+using Task = System.Threading.Tasks.Task;
 
 namespace Wikiled.FreeAgent.Tests
 {
@@ -12,9 +14,9 @@ namespace Wikiled.FreeAgent.Tests
     {
         public override ResourceClient<ExpenseWrapper, ExpensesWrapper, Expense> ResourceClient => Client.Expense;
 
-        public override bool CanDelete(Expense item)
+        public override Task<bool> CanDelete(Expense item)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         public override void CheckSingleItem(Expense item)
@@ -32,11 +34,10 @@ namespace Wikiled.FreeAgent.Tests
             Assert.AreEqual(newItem.dated_on, originalItem.dated_on);
         }
 
-        public override Expense CreateSingleItemForInsert()
+        public override async Task<Expense> CreateSingleItemForInsert()
         {
-            Assert.Ignore("IGNORING EXPENSE INSERTING UNTIL IT WORKS");
-            var user = Client.User.Me;
-            var cat = Client.Categories.Single("250");
+            var user = await Client.User.ResolveMe().ConfigureAwait(false);
+            var cat = await Client.Categories.Single("250").ConfigureAwait(false);
 
             return new Expense
                    {
@@ -51,13 +52,13 @@ namespace Wikiled.FreeAgent.Tests
                    };
         }
 
-        public override void SetupClient()
+        public override async Task SetupClient()
         {
-            base.SetupClient();
+            await base.SetupClient().ConfigureAwait(false);
             GetAll = ExpenseAll;
         }
 
-        public IEnumerable<Expense> ExpenseAll()
+        public IObservable<Expense> ExpenseAll()
         {
             return Client.Expense.All(view: "recent");
         }

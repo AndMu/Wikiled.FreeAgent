@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Net;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
+using Wikiled.FreeAgent.Auth;
 using Wikiled.FreeAgent.Client;
-using Wikiled.FreeAgent.Models;
 
 namespace Wikiled.FreeAgent.Tests
 {
@@ -16,7 +17,7 @@ namespace Wikiled.FreeAgent.Tests
         {
         }
 
-        public virtual void SetupClient()
+        public virtual async Task SetupClient()
         {
             Configure();
 
@@ -25,16 +26,16 @@ namespace Wikiled.FreeAgent.Tests
 
             Client = new FreeAgentClient(new NullLogger<FreeAgentClient>(), KeyStorage.AppKey, KeyStorage.AppSecret);
 
-            var sandbox_bttest_token = new AccessTokenData
+            var sandboxTestToken = new AccessTokenData
                                        {
                                            AccessToken = "",
                                            RefreshToken = KeyStorage.RefreshToken,
                                            TokenType = "bearer"
                                        };
 
-            Client.CurrentAccessToken = sandbox_bttest_token;
+            Client.CurrentAccessToken = sandboxTestToken;
 
-            Token = Client.RefreshAccessToken();
+            Token = await Client.RefreshToken(sandboxTestToken).ConfigureAwait(false);
 
             if (Token == null || string.IsNullOrEmpty(Token.AccessToken) || string.IsNullOrEmpty(Token.RefreshToken))
             {

@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using RestSharp;
 using Wikiled.FreeAgent.Models;
+using Task = Wikiled.FreeAgent.Models.Task;
 
 namespace Wikiled.FreeAgent.Client
 {
@@ -30,23 +33,18 @@ namespace Wikiled.FreeAgent.Client
             return new TaskWrapper {task = single};
         }
 
-        public List<Task> AllByProject(string projectId)
+        public IObservable<Task> AllByProject(string projectId)
         {
             return All(delegate(RestRequest req) { req.AddParameter("project", projectId, ParameterType.GetOrPost); });
         }
 
-        public Task Put(Task item, string projectId)
+        public async Task<Task> Put(Task item, string projectId)
         {
             var request = CreatePutRequest(item);
             request.Resource += "?project={project}";
-
             request.AddParameter("project", projectId, ParameterType.UrlSegment);
-
-            var response = Client.Execute<TaskWrapper>(request);
-
-            if (response != null) return SingleFromWrapper(response);
-
-            return null;
+            var response = await Client.Execute<TaskWrapper>(request).ConfigureAwait(false);
+            return response != null ? SingleFromWrapper(response) : null;
         }
     }
 }

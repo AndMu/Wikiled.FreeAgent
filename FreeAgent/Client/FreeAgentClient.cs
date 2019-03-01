@@ -1,39 +1,19 @@
 ﻿using System;
 using System.Net;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using RestSharp;
 using RestSharp.Serialization.Json;
+using Wikiled.Common.Utilities.Auth;
+using Wikiled.FreeAgent.Auth;
 using Wikiled.FreeAgent.Exceptions;
 using Wikiled.FreeAgent.Extensions;
 using Wikiled.FreeAgent.Helpers;
-using Wikiled.FreeAgent.Models;
 
 namespace Wikiled.FreeAgent.Client
 {
-    public class FreeAgentClient
+    public class FreeAgentClient : IAuthClient<AccessTokenData>
     {
-        private readonly ILogger<FreeAgentClient> logger;
-      
-        public AccessTokenData RefreshAccessToken()
-        {
-            restClient.BaseUrl = new Uri(BaseUrl);
-
-            var request = Helper.CreateRefreshTokenRequest();
-            var response = Execute<AccessTokenData>(request);
-
-            if (response != null && !string.IsNullOrEmpty(response.AccessToken))
-            {
-                var token = CurrentAccessToken;
-                token.AccessToken = response.AccessToken;
-                token.ExpiresIn = response.ExpiresIn;
-
-                CurrentAccessToken = token;
-                return CurrentAccessToken;
-            }
-
-            return null;
-        }
-
         public const string Version = "2";
 
         private const string ApiBaseUrl = "https://api.freeagent.com";
@@ -46,50 +26,52 @@ namespace Wikiled.FreeAgent.Client
 
         private readonly string appsecret;
 
-        public AccountingClient Accounting;
-
-        public BankAccountClient BankAccount;
-
-        public BankTransactionClient BankTransaction;
-
-        public BankTransactionExplanationClient BankTransactionExplanation;
-
-        public BillClient Bill;
-
-        public CategoryClient Categories;
-
-        public CompanyClient Company;
-
-        public ContactClient Contact;
-
-        public ExpenseClient Expense;
-
-        public InvoiceClient Invoice;
-
-        public ProjectClient Project;
-
-        public TaskClient Task;
-
-        public TimeslipClient Timeslip;
-
-        public UserClient User;
+        private readonly ILogger<FreeAgentClient> logger;
 
         private AccessTokenData currentAccessToken;
 
         private RestClient restClient;
 
-        private RestClient restClientModified;
 
-
-        public FreeAgentClient(ILogger<FreeAgentClient> logger, string apiKey, string appSecret, AccessTokenData savedToken = null)
+        public FreeAgentClient(ILogger<FreeAgentClient> logger,
+                               string apiKey,
+                               string appSecret,
+                               AccessTokenData savedToken = null)
         {
             this.apiKey = apiKey;
             appsecret = appSecret;
             CurrentAccessToken = savedToken;
             this.logger = logger;
-
             LoadClient();
         }
+
+        public AccountingClient Accounting { get; set; }
+
+        public BankAccountClient BankAccount { get; set; }
+
+        public BankTransactionClient BankTransaction { get; set; }
+
+        public BankTransactionExplanationClient BankTransactionExplanation { get; set; }
+
+        public BillClient Bill { get; set; }
+
+        public CategoryClient Categories { get; set; }
+
+        public CompanyClient Company { get; set; }
+
+        public ContactClient Contact { get; set; }
+
+        public ExpenseClient Expense { get; set; }
+
+        public InvoiceClient Invoice { get; set; }
+
+        public ProjectClient Project { get; set; }
+
+        public TaskClient Task { get; set; }
+
+        public TimeslipClient Timeslip { get; set; }
+
+        public UserClient User { get; private set; }
 
         public static bool UseSandbox { get; set; }
 
@@ -113,17 +95,37 @@ namespace Wikiled.FreeAgent.Client
         /// </summary>
         private string BaseUrl => UseSandbox ? ApiSandboxBaseUrl : ApiBaseUrl;
 
+        public async Task<AccessTokenData> RefreshToken(AccessTokenData token)
+        {
+            restClient.BaseUrl = new Uri(BaseUrl);
+
+            var request = Helper.CreateRefreshTokenRequest();
+            var response = await Execute<AccessTokenData>(request).ConfigureAwait(false);
+
+            if (response != null && !string.IsNullOrEmpty(response.AccessToken))
+            {
+                token.AccessToken = response.AccessToken;
+                token.ExpiresIn = response.ExpiresIn;
+
+                CurrentAccessToken = token;
+                return CurrentAccessToken;
+            }
+
+            return null;
+        }
+
         public string BuildAuthorizeUrl(string callback = null)
         {
             //Go 1-Liner!
-            return $"{BaseUrl}/v{Version}/approve_app?response_type=code&client_id={apiKey}{(string.IsNullOrEmpty(callback) ? string.Empty : "&redirect_uri=" + callback.UrlEncode())}&state=foo";
+            return
+                $"{BaseUrl}/v{Version}/approve_app?response_type=code&client_id={apiKey}{(string.IsNullOrEmpty(callback) ? string.Empty : "&redirect_uri=" + callback.UrlEncode())}&state=foo";
         }
 
-        public AccessTokenData GetAccessToken(string code, string redirectUri = "")
+        public async Task<AccessTokenData> GetToken(string code, string redirectUri = null)
         {
             restClient.BaseUrl = new Uri(BaseUrl);
             var request = Helper.CreateAccessTokenRequest(code, redirectUri);
-            var response = Execute<AccessTokenData>(request);
+            var response = await Execute<AccessTokenData>(request).ConfigureAwait(false);
             if (response != null && !string.IsNullOrEmpty(response.AccessToken))
             {
                 CurrentAccessToken = response;
@@ -139,7 +141,7 @@ namespace Wikiled.FreeAgent.Client
 
         private bool IsSuccess(HttpStatusCode code)
         {
-            int val = (int)code;
+            var val = (int)code;
             if (val < 299)
             {
                 return true;
@@ -184,10 +186,10 @@ namespace Wikiled.FreeAgent.Client
             Bill = new BillClient(this);
         }
 
-        internal T Execute<T>(IRestRequest request) where T : new()
+        internal async Task<T> Execute<T>(IRestRequest request) where T : new()
         {
             SetProxy();
-            var response = restClient.Execute<T>(request);
+            var response = await restClient.ExecuteTaskAsync<T>(request).ConfigureAwait(false);
             if (!IsSuccess(response.StatusCode))
             {
                 logger.LogError(response.Content);

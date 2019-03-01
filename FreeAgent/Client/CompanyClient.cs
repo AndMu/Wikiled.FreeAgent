@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using RestSharp;
 using Wikiled.FreeAgent.Models;
 
@@ -13,24 +14,18 @@ namespace Wikiled.FreeAgent.Client
 
         public override string ResourceName => "company";
 
-        public Company Single()
+        public async Task<Company> Single()
         {
             var request = CreateBasicRequest(Method.GET);
-            var response = Client.Execute<CompanyWrapper>(request);
-
-            if (response != null) return response.company;
-
-            return null;
+            var response = await Client.Execute<CompanyWrapper>(request).ConfigureAwait(false);
+            return response?.company;
         }
 
-        public List<TaxTimeline> TaxTimeline()
+        public async Task<List<TaxTimeline>> TaxTimeline()
         {
             var request = CreateBasicRequest(Method.GET, "/tax_timeline");
-            var response = Client.Execute<TaxTimelineWrapper>(request);
-
-            if (response != null) return response.timeline_items;
-
-            return null;
+            var response = await Client.Execute<TaxTimelineWrapper>(request).ConfigureAwait(false);
+            return response?.timeline_items;
         }
     }
 }

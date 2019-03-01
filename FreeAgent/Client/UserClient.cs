@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Wikiled.FreeAgent.Models;
 
 namespace Wikiled.FreeAgent.Client
@@ -14,7 +15,7 @@ namespace Wikiled.FreeAgent.Client
 
         public override string ResourceName => "users";
 
-        public User Me => Get("me");
+        public Task<User> ResolveMe() => Get("me");
 
         public override List<User> ListFromWrapper(UsersWrapper wrapper)
         {

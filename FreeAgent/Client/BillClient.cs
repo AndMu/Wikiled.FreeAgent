@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using RestSharp;
 using Wikiled.FreeAgent.Models;
 
@@ -40,7 +42,7 @@ namespace Wikiled.FreeAgent.Client
         /// <param name='toDate'>
         ///     To_date.
         /// </param>
-        public List<Bill> All(string fromDate = "", string toDate = "")
+        public IObservable<Bill> All(string fromDate = "", string toDate = "")
         {
             return All(
                 r =>

@@ -1,6 +1,6 @@
+using RestSharp;
 using System;
 using System.Collections.Generic;
-using RestSharp;
 using Wikiled.FreeAgent.Extensions;
 using Wikiled.FreeAgent.Models;
 
@@ -32,17 +32,17 @@ namespace Wikiled.FreeAgent.Client
             return new TimeslipWrapper {timeslip = single};
         }
 
-        public List<Timeslip> All(string from_date, string to_date)
+        public IObservable<Timeslip> All(string fromDate, string toDate)
         {
             return All(
                 r =>
                 {
-                    r.AddParameter("from_date", from_date, ParameterType.GetOrPost);
-                    r.AddParameter("to_date", to_date, ParameterType.GetOrPost);
+                    r.AddParameter("from_date", fromDate, ParameterType.GetOrPost);
+                    r.AddParameter("to_date", toDate, ParameterType.GetOrPost);
                 });
         }
 
-        public List<Timeslip> AllRecent()
+        public IObservable<Timeslip> AllRecent()
         {
             DateTime now = DateTime.Now;
 

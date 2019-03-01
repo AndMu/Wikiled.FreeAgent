@@ -1,9 +1,12 @@
 using System;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wikiled.FreeAgent.Client;
 using Wikiled.FreeAgent.Extensions;
 using Wikiled.FreeAgent.Models;
+using Task = System.Threading.Tasks.Task;
 
 namespace Wikiled.FreeAgent.Tests
 {
@@ -11,11 +14,14 @@ namespace Wikiled.FreeAgent.Tests
     {
         public override ResourceClient<TimeslipWrapper, TimeslipsWrapper, Timeslip> ResourceClient => Client.Timeslip;
 
-        public override bool CanDelete(Timeslip item)
+        public override Task<bool> CanDelete(Timeslip item)
         {
-            //return false;
-            if (string.IsNullOrEmpty(item.comment)) return false;
-            return item.comment.Contains("TEST");
+            if (string.IsNullOrEmpty(item.comment))
+            {
+                return Task.FromResult(false);
+            }
+
+            return Task.FromResult(item.comment.Contains("TEST"));
         }
 
         public override void CheckSingleItem(Timeslip item)
@@ -46,11 +52,11 @@ namespace Wikiled.FreeAgent.Tests
             //ExecuteCanDeleteAndCleanup = false;
         }
 
-        public override Timeslip CreateSingleItemForInsert()
+        public override async Task<Timeslip> CreateSingleItemForInsert()
         {
-            var user = Client.User.Me;
-            var project = Client.Project.All().First();
-            var task = Client.Task.AllByProject(project.Id()).First();
+            var user = await Client.User.ResolveMe().ConfigureAwait(false);
+            var project = await Client.Project.All().FirstAsync();
+            var task = await Client.Task.AllByProject(project.Id()).FirstAsync();
 
             return new Timeslip
                    {
@@ -73,12 +79,10 @@ namespace Wikiled.FreeAgent.Tests
         }
 
         [Test]
-        public void CanGetListOfTimeslipWithContent()
+        public async Task CanGetListOfTimeslipWithContent()
         {
-            var list = Client.Timeslip.All(DateTime.Now.AddMonths(-6).ModelDateTime(), DateTime.Now.ModelDateTime());
-
+            var list = await Client.Timeslip.All(DateTime.Now.AddMonths(-6).ModelDateTime(), DateTime.Now.ModelDateTime()).ToArray();
             CheckAllList(list);
-
             foreach (var item in list)
             {
                 CheckSingleItem(item);

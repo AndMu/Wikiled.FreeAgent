@@ -2,9 +2,9 @@
 using NLog.Extensions.Logging;
 using System.Collections.Generic;
 using Wikiled.Common.Logging;
+using Wikiled.Console.Auth;
 using Wikiled.FreeAgent.Client;
 using Wikiled.FreeAgent.Models;
-using Wikiled.FreeAgent.TestApp.Auth;
 
 namespace Wikiled.FreeAgent.TestApp
 {
@@ -18,20 +18,15 @@ namespace Wikiled.FreeAgent.TestApp
             var client = new FreeAgentClient(new Logger<FreeAgentClient>(ApplicationLogging.LoggerFactory),
                                              KeyStorage.AppKey,
                                              KeyStorage.AppSecret);
-            string code;
-            AccessTokenData token;
             var helper = new OAuthHelper(new Logger<OAuthHelper>(ApplicationLogging.LoggerFactory));
             var auth = client.BuildAuthorizeUrl(helper.RedirectUri);
             await helper.Start(auth, null).ConfigureAwait(false);
-            code = helper.Code;
-            helper.Start(auth, null);
-            token = client.GetAccessToken(code, helper.RedirectUri);
-            //await helper.Start(null).ConfigureAwait(false);
-            //token.access_token = helper.Code;
+            var code = helper.Code;
+            var token = await client.GetToken(code, helper.RedirectUri).ConfigureAwait(false);
 
             client.CurrentAccessToken = token;
-            client.RefreshAccessToken();
-            List<TaxTimeline> timeline = client.Company.TaxTimeline();
+            await client.RefreshToken(token).ConfigureAwait(false);
+            List<TaxTimeline> timeline = await client.Company.TaxTimeline().ConfigureAwait(false);
         }
     }
 }

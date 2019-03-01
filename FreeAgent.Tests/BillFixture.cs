@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wikiled.FreeAgent.Client;
 using Wikiled.FreeAgent.Extensions;
 using Wikiled.FreeAgent.Models;
+using Task = System.Threading.Tasks.Task;
 
 namespace Wikiled.FreeAgent.Tests
 {
@@ -12,9 +14,9 @@ namespace Wikiled.FreeAgent.Tests
     {
         public override ResourceClient<BillWrapper, BillsWrapper, Bill> ResourceClient => Client.Bill;
 
-        public override bool CanDelete(Bill item)
+        public override Task<bool> CanDelete(Bill item)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         public override void CheckSingleItem(Bill item)
@@ -32,11 +34,10 @@ namespace Wikiled.FreeAgent.Tests
             Assert.AreEqual(newItem.dated_on, originalItem.dated_on);
         }
 
-        public override Bill CreateSingleItemForInsert()
+        public override async Task<Bill> CreateSingleItemForInsert()
         {
-            Assert.Ignore("IGNORING Bill INSERTING UNTIL IT WORKS");
-            var user = Client.User.Me;
-            var cat = Client.Categories.Single("250");
+            var user = await Client.User.ResolveMe().ConfigureAwait(false);
+            var cat = await Client.Categories.Single("250").ConfigureAwait(false);
 
             return new Bill
                    {
@@ -48,13 +49,13 @@ namespace Wikiled.FreeAgent.Tests
                    };
         }
 
-        public override void SetupClient()
+        public override async Task SetupClient()
         {
-            base.SetupClient();
+            await base.SetupClient().ConfigureAwait(false);
             GetAll = BillAll;
         }
 
-        public IEnumerable<Bill> BillAll()
+        public IObservable<Bill> BillAll()
         {
             return Client.Bill.All("recent");
         }

@@ -1,8 +1,11 @@
 ﻿using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wikiled.FreeAgent.Client;
 using Wikiled.FreeAgent.Extensions;
 using Wikiled.FreeAgent.Models;
+using Task = System.Threading.Tasks.Task;
 
 namespace Wikiled.FreeAgent.Tests
 {
@@ -11,9 +14,9 @@ namespace Wikiled.FreeAgent.Tests
     {
         public override ResourceClient<ProjectWrapper, ProjectsWrapper, Project> ResourceClient => Client.Project;
 
-        public override bool CanDelete(Project item)
+        public override Task<bool> CanDelete(Project item)
         {
-            return item.name.Contains("TEST");
+            return Task.FromResult(item.name.Contains("TEST"));
         }
 
         public override void CheckSingleItem(Project item)
@@ -34,9 +37,9 @@ namespace Wikiled.FreeAgent.Tests
             Assert.AreEqual(newItem.currency, originalItem.currency);
         }
 
-        public override Project CreateSingleItemForInsert()
+        public override async Task<Project> CreateSingleItemForInsert()
         {
-            var contact = Client.Contact.All().First();
+            var contact = await Client.Contact.All().FirstAsync();
 
             Assert.IsNotNull(contact);
 

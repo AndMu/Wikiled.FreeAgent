@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Wikiled.FreeAgent.Models
+namespace Wikiled.FreeAgent.Auth
 {
     public class AccessTokenData
     {

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wikiled.FreeAgent.Client;
 using Wikiled.FreeAgent.Extensions;
 using Wikiled.FreeAgent.Models;
+using Task = System.Threading.Tasks.Task;
 
 namespace Wikiled.FreeAgent.Tests
 {
@@ -14,13 +17,13 @@ namespace Wikiled.FreeAgent.Tests
     {
         protected bool ExecuteCanGetList = true, ExecuteCanGetListWithContent = true, ExecuteCanLoadById = true, ExecuteCanCreateSingle = true, ExecuteCanDeleteAndCleanup = true;
 
-        protected Func<IEnumerable<TSingle>> GetAll;
+        protected Func<IObservable<TSingle>> GetAll;
 
         public virtual ResourceClient<TSingleWrapper, TListWrapper, TSingle> ResourceClient => throw new NotImplementedException("oops!");
 
-        public virtual bool CanDelete(TSingle item)
+        public virtual Task<bool> CanDelete(TSingle item)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         public virtual void CheckSingleItem(TSingle item)
@@ -32,19 +35,19 @@ namespace Wikiled.FreeAgent.Tests
             throw new NotImplementedException("needs to be overridden");
         }
 
-        public virtual TSingle CreateSingleItemForInsert()
+        public virtual Task<TSingle> CreateSingleItemForInsert()
         {
             throw new NotImplementedException("needs to be overridden");
         }
 
-        public override void SetupClient()
+        public override async Task SetupClient()
         {
-            base.SetupClient();
+            await base.SetupClient().ConfigureAwait(false);
             GetAll = ResourceFixtureAll;
         }
 
         [Test]
-        public void CanCreateSingle()
+        public async Task CanCreateSingle()
         {
             if (!ExecuteCanCreateSingle)
             {
@@ -52,15 +55,15 @@ namespace Wikiled.FreeAgent.Tests
                 return;
             }
 
-            TSingle item = CreateSingleItemForInsert();
+            TSingle item = await CreateSingleItemForInsert().ConfigureAwait(false);
 
-            TSingle result = ResourceClient.Put(item);
+            TSingle result = await ResourceClient.Put(item).ConfigureAwait(false);
 
             CompareSingleItem(item, result);
         }
 
         [Test]
-        public void CanDeleteAndCleanup()
+        public async Task CanDeleteAndCleanup()
         {
             if (!ExecuteCanDeleteAndCleanup)
             {
@@ -68,18 +71,18 @@ namespace Wikiled.FreeAgent.Tests
                 return;
             }
 
-            var items = GetAll();
-
+            var items = await GetAll().ToArray();
             CheckAllList(items);
             foreach (var item in items)
             {
-                if (!CanDelete(item)) continue;
+                if (!await CanDelete(item).ConfigureAwait(false))
+                {
+                    continue;
+                }
 
                 ResourceClient.Delete(item.Id());
-
-                var deletedclient = ResourceClient.Get(item.Id());
-
-                Assert.IsNull(deletedclient);
+                var deletedClient = ResourceClient.Get(item.Id());
+                Assert.IsNull(deletedClient);
             }
         }
 
@@ -98,7 +101,7 @@ namespace Wikiled.FreeAgent.Tests
         }
 
         [Test]
-        public void CanGetListWithContent()
+        public async Task CanGetListWithContent()
         {
             if (!ExecuteCanGetListWithContent)
             {
@@ -106,7 +109,7 @@ namespace Wikiled.FreeAgent.Tests
                 return;
             }
 
-            var list = GetAll();
+            var list = await GetAll().ToArray();
 
             CheckAllList(list);
 
@@ -117,7 +120,7 @@ namespace Wikiled.FreeAgent.Tests
         }
 
         [Test]
-        public void CanLoadById()
+        public async Task CanLoadById()
         {
             if (!ExecuteCanLoadById)
             {
@@ -125,14 +128,13 @@ namespace Wikiled.FreeAgent.Tests
                 return;
             }
 
-            var items = GetAll();
+            var items = await GetAll().ToArray();
             CheckAllList(items);
 
             foreach (var item in items)
             {
-                var newitem = ResourceClient.Get(item.Id());
-
-                CompareSingleItem(item, newitem);
+                var newItem = await ResourceClient.Get(item.Id()).ConfigureAwait(false);
+                CompareSingleItem(item, newItem);
             }
         }
 
@@ -142,15 +144,15 @@ namespace Wikiled.FreeAgent.Tests
             Assert.IsNotEmpty(list);
         }
 
-        public IEnumerable<TSingle> ResourceFixtureAll()
+        public IObservable<TSingle> ResourceFixtureAll()
         {
             return ResourceClient.All();
         }
 
         [SetUp]
-        public void Setup()
+        public async Task Setup()
         {
-            SetupClient();
+            await SetupClient().ConfigureAwait(false);
         }
     }
 }

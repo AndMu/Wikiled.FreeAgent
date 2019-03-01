@@ -1,4 +1,5 @@
 using RestSharp;
+using Wikiled.FreeAgent.Auth;
 using Wikiled.FreeAgent.Models;
 
 namespace Wikiled.FreeAgent.Helpers
@@ -21,7 +22,7 @@ namespace Wikiled.FreeAgent.Helpers
 
         public AccessTokenData CurrentAccessToken { get; set; }
 
-        public RestRequest CreateAccessTokenRequest(string code, string callback = "")
+        public RestRequest CreateAccessTokenRequest(string code, string callback = null)
         {
             // grant_type=authorization_code
             // code=<the code from the url>

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using RestSharp;
 using Wikiled.FreeAgent.Exceptions;
 using Wikiled.FreeAgent.Extensions;
@@ -15,7 +17,7 @@ namespace Wikiled.FreeAgent.Client
     {
         private const int PageSize = 50;
 
-        public ResourceClient(FreeAgentClient client)
+        protected ResourceClient(FreeAgentClient client)
             : base(client)
         {
         }
@@ -32,39 +34,43 @@ namespace Wikiled.FreeAgent.Client
             request.AddParameter("per_page", PageSize, ParameterType.GetOrPost);
         }
 
-        public List<TSingle> All(Action<RestRequest> customizeRequest = null)
+        public IObservable<TSingle> All(Action<RestRequest> customizeRequest = null)
         {
-            int page = 1;
-
-            List<TSingle> allItems = new List<TSingle>();
-
-            while (true)
-            {
-                var request = CreateAllRequest();
-                customizeRequest?.Invoke(request);
-
-                AddPaging(request, page);
-
-                var response = Client.Execute<TListWrapper>(request);
-
-                if (response != null)
+            return Observable.Create<TSingle>(
+                async observer =>
                 {
-                    var newItems = ListFromWrapper(response);
-                    allItems.AddRange(newItems);
+                    int page = 1;
+                    while (true)
+                    {
+                        var request = CreateAllRequest();
+                        customizeRequest?.Invoke(request);
 
-                    if (newItems.Count < PageSize) return allItems;
-                }
-                else if (response == null && page == 1)
-                {
-                    return null;
-                }
-                else
-                {
-                    return allItems;
-                }
+                        AddPaging(request, page);
 
-                page++;
-            }
+                        var response = await Client.Execute<TListWrapper>(request).ConfigureAwait(false);
+                        if (response != null)
+                        {
+                            var newItems = ListFromWrapper(response);
+                            foreach (var item in newItems)
+                            {
+                                observer.OnNext(item);
+                            }
+
+                            if (newItems.Count < PageSize)
+                            {
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            break;
+                        }
+
+                        page++;
+                    }
+
+                    observer.OnCompleted();
+                });
         }
 
         public void Delete(string id)
@@ -73,16 +79,13 @@ namespace Wikiled.FreeAgent.Client
             var response = Client.Execute(request);
         }
 
-        public TSingle Get(string id)
+        public async Task<TSingle> Get(string id)
         {
             try
             {
                 var request = CreateGetRequest(id);
-                var response = Client.Execute<TSingleWrapper>(request);
-
-                if (response != null) return SingleFromWrapper(response);
-
-                return null;
+                var response = await Client.Execute<TSingleWrapper>(request).ConfigureAwait(false);
+                return response != null ? SingleFromWrapper(response) : null;
             }
             catch (FreeAgentException fex)
             {
@@ -95,14 +98,11 @@ namespace Wikiled.FreeAgent.Client
             }
         }
 
-        public TSingle Put(TSingle c)
+        public async Task<TSingle> Put(TSingle c)
         {
             var request = CreatePutRequest(c);
-            var response = Client.Execute<TSingleWrapper>(request);
-
-            if (response != null) return SingleFromWrapper(response);
-
-            return null;
+            var response = await Client.Execute<TSingleWrapper>(request).ConfigureAwait(false);
+            return response != null ? SingleFromWrapper(response) : null;
         }
 
         protected RestRequest CreateAllRequest()

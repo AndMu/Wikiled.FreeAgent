@@ -1,7 +1,9 @@
 using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wikiled.FreeAgent.Client;
 using Wikiled.FreeAgent.Models;
+using Task = System.Threading.Tasks.Task;
 
 namespace Wikiled.FreeAgent.Tests
 {
@@ -10,18 +12,14 @@ namespace Wikiled.FreeAgent.Tests
     {
         public override ResourceClient<ContactWrapper, ContactsWrapper, Contact> ResourceClient => Client.Contact;
 
-        public override bool CanDelete(Contact item)
+        public override Task<bool> CanDelete(Contact item)
         {
-            return item.first_name.Contains("TEST");
+            return Task.FromResult(item.first_name.Contains("TEST"));
         }
 
         public override void CheckSingleItem(Contact item)
         {
             Assert.IsNotEmpty(item.url);
-
-            //Assert.IsNotEmpty(contact.organisation_name);
-            //Assert.IsNotEmpty(contact.first_name);
-            //Assert.IsNotEmpty(contact.last_name);
         }
 
         public override void CompareSingleItem(Contact originalItem, Contact newItem)
@@ -33,16 +31,16 @@ namespace Wikiled.FreeAgent.Tests
             Assert.AreEqual(newItem.address1, originalItem.address1);
         }
 
-        public override Contact CreateSingleItemForInsert()
+        public override Task<Contact> CreateSingleItemForInsert()
         {
-            return new Contact
-                   {
-                       url = "",
-                       first_name = "Nic TEST",
-                       last_name = "Wise",
-                       organisation_name = "foo",
-                       address1 = DateTime.Now.ToLongTimeString()
-                   };
+            return Task.FromResult(new Contact
+            {
+                url = "",
+                first_name = "Nic TEST",
+                last_name = "Wise",
+                organisation_name = "foo",
+                address1 = DateTime.Now.ToLongTimeString()
+            });
         }
     }
 }

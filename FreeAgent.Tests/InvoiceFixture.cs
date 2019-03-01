@@ -1,10 +1,13 @@
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Wikiled.FreeAgent.Client;
 using Wikiled.FreeAgent.Extensions;
 using Wikiled.FreeAgent.Models;
+using Task = System.Threading.Tasks.Task;
 
 namespace Wikiled.FreeAgent.Tests
 {
@@ -13,16 +16,19 @@ namespace Wikiled.FreeAgent.Tests
     {
         public override ResourceClient<InvoiceWrapper, InvoicesWrapper, Invoice> ResourceClient => Client.Invoice;
 
-        public override bool CanDelete(Invoice item)
+        public override async Task<bool> CanDelete(Invoice item)
         {
-            if (item == null) return false;
-
-            var newitem = ResourceClient.Get(item.Id());
-
-            if (newitem.invoice_items.Count == 0) return false;
-            foreach (var invoiceitem in newitem.invoice_items)
+            if (item == null)
             {
-                if (invoiceitem.description.Contains("TEST")) return true;
+                return false;
+            }
+
+            var newItem = await ResourceClient.Get(item.Id()).ConfigureAwait(false);
+
+            if (newItem.invoice_items.Count == 0) return false;
+            foreach (var invoiceItem in newItem.invoice_items)
+            {
+                if (invoiceItem.description.Contains("TEST")) return true;
             }
 
             return false;
@@ -46,9 +52,9 @@ namespace Wikiled.FreeAgent.Tests
             ExecuteCanGetListWithContent = false;
         }
 
-        public override Invoice CreateSingleItemForInsert()
+        public override async Task<Invoice> CreateSingleItemForInsert()
         {
-            var contact = Client.Contact.All().First();
+            var contact = await Client.Contact.All().FirstAsync();
 
             Assert.IsNotNull(contact);
 
@@ -76,11 +82,11 @@ namespace Wikiled.FreeAgent.Tests
         }
 
         [Test]
-        public void CanGetListForContact()
+        public async Task CanGetListForContact()
         {
-            var contact = Client.Contact.All().First();
+            var contact = await Client.Contact.All().FirstAsync();
 
-            var list = Client.Invoice.AllForContact(contact.UrlId());
+            var list = await Client.Invoice.AllForContact(contact.UrlId()).ToArray();
 
             CheckAllList(list);
 
@@ -91,12 +97,11 @@ namespace Wikiled.FreeAgent.Tests
         }
 
         [Test]
-        public void CanGetListForProject()
+        public async Task CanGetListForProject()
         {
-            var project = Client.Project.All().First();
+            var project = await Client.Project.All().FirstAsync();
 
-            var list = Client.Invoice.AllForProject(project.UrlId());
-
+            var list = await Client.Invoice.AllForProject(project.UrlId()).ToArray();
             CheckAllList(list);
 
             foreach (var item in list)
@@ -106,9 +111,9 @@ namespace Wikiled.FreeAgent.Tests
         }
 
         [Test]
-        public void CanGetListWithSingleCall()
+        public async Task CanGetListWithSingleCall()
         {
-            var list = Client.Invoice.AllWithFilter(InvoiceViewFilter.RecentOpenOrOverdue);
+            var list = await Client.Invoice.AllWithFilter(InvoiceViewFilter.RecentOpenOrOverdue).ToArray();
 
             CheckAllList(list);
 
@@ -117,7 +122,5 @@ namespace Wikiled.FreeAgent.Tests
                 CheckSingleItem(item);
             }
         }
-
-        //should add invoice timeline in here? 
     }
 }

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using RestSharp;
 using Wikiled.FreeAgent.Models;
 
@@ -17,19 +18,19 @@ namespace Wikiled.FreeAgent.Client
 
         public override string ResourceName => "categories";
 
-        public Categories All()
+        public async Task<Categories> All()
         {
             var request = CreateBasicRequest(Method.GET);
-            var response = Client.Execute<Categories>(request);
-
-            if (response != null) return response;
-
-            return null;
+            var response = await Client.Execute<Categories>(request).ConfigureAwait(false);
+            return response;
         }
 
-        public Category Single(string id)
+        public async Task<Category> Single(string id)
         {
-            if (all == null) all = All();
+            if (all == null)
+            {
+                all = await All().ConfigureAwait(false);
+            }
 
             foreach (var cat in all.admin_expenses_categories)
             {

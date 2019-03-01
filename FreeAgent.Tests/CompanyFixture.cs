@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 using Wikiled.FreeAgent.Models;
+using Task = System.Threading.Tasks.Task;
 
 namespace Wikiled.FreeAgent.Tests
 {
@@ -8,33 +9,32 @@ namespace Wikiled.FreeAgent.Tests
     public class CompanyFixture : BaseFixture
     {
         [Test]
-        public void CanGetTaxTimeline()
+        public async Task CanGetTaxTimeline()
         {
-            List<TaxTimeline> timeline = Client.Company.TaxTimeline();
+            List<TaxTimeline> timeline = await Client.Company.TaxTimeline().ConfigureAwait(false);
 
             Assert.IsNotNull(timeline);
             Assert.IsNotEmpty(timeline);
         }
 
         [Test]
-        public void CanLoadCompany()
+        public async Task CanLoadCompany()
         {
-            Company company = Client.Company.Single();
-
+            Company company = await Client.Company.Single().ConfigureAwait(false);
             Assert.IsNotNull(company);
             Assert.IsNotEmpty(company.name);
         }
 
         [SetUp]
-        public void Setup()
+        public async Task Setup()
         {
-            SetupClient();
+            await SetupClient().ConfigureAwait(false);
         }
 
         [Test]
-        public void TaxTimelineHasContent()
+        public async Task TaxTimelineHasContent()
         {
-            List<TaxTimeline> timeline = Client.Company.TaxTimeline();
+            List<TaxTimeline> timeline = await Client.Company.TaxTimeline().ConfigureAwait(false);
 
             Assert.IsNotNull(timeline);
             Assert.IsNotEmpty(timeline);
