@@ -25,17 +25,5 @@ namespace Wikiled.FreeAgent.Models
         public string rebill_type { get; set; }
 
         public double sales_tax_rate { get; set; }
-
-        /* public string receipt_reference { get; set; }
-
-
-
-		public int ec_status { get; set; }
-
-		public string currency { get; set; }
-
-
-		public bool have_vat_receipt { get; set; }
-*/
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using Wikiled.Common.Logging;
 using Wikiled.Common.Utilities.Auth;
 using Wikiled.Console.Auth;
@@ -16,7 +17,7 @@ namespace Wikiled.FreeAgent.TestApp
         {
             NLog.LogManager.LoadConfiguration("nlog.config");
             ApplicationLogging.LoggerFactory.AddNLog();
-            FreeAgentClient.UseSandbox = true;
+            //FreeAgentClient.UseSandbox = true;
             var client = new FreeAgentClient(new Logger<FreeAgentClient>(ApplicationLogging.LoggerFactory),
                                              KeyStorage.AppKey,
                                              KeyStorage.AppSecret);
@@ -26,7 +27,9 @@ namespace Wikiled.FreeAgent.TestApp
                     new Logger<PersistedAuthentication<AccessTokenData>>(ApplicationLogging.LoggerFactory),
                     new ConsoleOAuthAuthentication<AccessTokenData>(client, helper));
             await auth.Authenticate().ConfigureAwait(false);
-            List<TaxTimeline> timeline = await client.Company.TaxTimeline().ConfigureAwait(false);
+            //var timeline = await client.Company.TaxTimeline().ConfigureAwait(false);
+            var banks = await client.BankAccount.All().ToArray();
+            var transactions = await client.BankTransactionExplanation.All(banks[0].name).ToArray();
         }
     }
 }

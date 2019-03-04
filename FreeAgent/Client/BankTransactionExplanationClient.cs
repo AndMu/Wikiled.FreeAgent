@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using RestSharp;
 using Wikiled.FreeAgent.Models;
 
 namespace Wikiled.FreeAgent.Client
@@ -10,9 +12,12 @@ namespace Wikiled.FreeAgent.Client
         {
         }
 
-        //need to add in the GET to have a parameter for the date filter
-
         public override string ResourceName => "bank_transaction_explanations";
+
+        public IObservable<BankTransactionExplanation> All(string account)
+        {
+            return All(r => { r.AddParameter("bank_transaction", account, ParameterType.GetOrPost); });
+        }
 
         public override List<BankTransactionExplanation> ListFromWrapper(BankTransactionExplanationsWrapper wrapper)
         {
