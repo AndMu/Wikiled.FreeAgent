@@ -14,9 +14,14 @@ namespace Wikiled.FreeAgent.Client
 
         public override string ResourceName => "bank_transaction_explanations";
 
-        public IObservable<BankTransactionExplanation> All(string account)
+        public IObservable<BankTransactionExplanation> All(BankAccount account)
         {
-            return All(r => { r.AddParameter("bank_transaction", account, ParameterType.GetOrPost); });
+            if (account == null)
+            {
+                throw new ArgumentNullException(nameof(account));
+            }
+
+            return All(r => { r.AddParameter("bank_account", account.url, ParameterType.GetOrPost); });
         }
 
         public override List<BankTransactionExplanation> ListFromWrapper(BankTransactionExplanationsWrapper wrapper)

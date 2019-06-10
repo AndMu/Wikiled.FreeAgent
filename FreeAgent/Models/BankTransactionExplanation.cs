@@ -1,29 +1,43 @@
+using Newtonsoft.Json;
+
 namespace Wikiled.FreeAgent.Models
 {
     public class BankTransactionExplanation : UpdatableModel
     {
-        public ExpenseAttachment attachment { get; set; }
+        [JsonProperty("attachment")]
+        public ExpenseAttachment Attachment { get; set; }
 
-        public string bank_account { get; set; }
+        [JsonProperty("bank_account")]
+        public string BankAccount { get; set; }
 
-        public string bank_transaction { get; set; }
+        [JsonProperty("bank_transaction")]
+        public string BankTransaction { get; set; }
 
-        public string category { get; set; }
+        [JsonProperty("category")]
+        public string Category { get; set; }
 
-        public string dated_on { get; set; }
+        [JsonProperty("dated_on")]
+        public string DatedOn { get; set; }
 
-        public string description { get; set; }
+        [JsonProperty("description")]
+        public string Description { get; set; }
 
-        public double foreign_currency_value { get; set; }
+        [JsonProperty("foreign_currency_value")]
+        public double ForeignCurrencyValue { get; set; }
 
-        public double gross_value { get; set; }
+        [JsonProperty("gross_value")]
+        public double GrossValue { get; set; }
 
-        public double manual_sales_tax_amount { get; set; }
+        [JsonProperty("manual_sales_tax_amount")]
+        public double ManualSalesTaxAmount { get; set; }
 
-        public double rebill_factor { get; set; }
+        [JsonProperty("rebill_factor")]
+        public double RebillFactor { get; set; }
 
-        public string rebill_type { get; set; }
+        [JsonProperty("rebill_type")]
+        public string RebillType { get; set; }
 
-        public double sales_tax_rate { get; set; }
+        [JsonProperty("sales_tax_rate")]
+        public double SalesTaxRate { get; set; }
     }
 }

@@ -33,14 +33,10 @@ namespace Wikiled.FreeAgent.Client
         private RestClient restClient;
 
 
-        public FreeAgentClient(ILogger<FreeAgentClient> logger,
-                               string apiKey,
-                               string appSecret,
-                               AccessTokenData savedToken = null)
+        public FreeAgentClient(ILogger<FreeAgentClient> logger, string apiKey, string appSecret)
         {
             this.apiKey = apiKey;
             appsecret = appSecret;
-            CurrentAccessToken = savedToken;
             this.logger = logger;
             LoadClient();
         }

@@ -1,13 +1,29 @@
+using Newtonsoft.Json;
+
 namespace Wikiled.FreeAgent.Models
 {
     public class ExpenseAttachment
     {
-        public string content_type { get; set; }
+        [JsonProperty("content_type")]
+        public string ContentType { get; set; }
 
-        public string data { get; set; }
+        [JsonProperty("description")]
+        public string Description { get; set; }
 
-        public string description { get; set; }
+        [JsonProperty("file_name")]
+        public string FileName { get; set; }
 
-        public string file_name { get; set; }
+        [JsonProperty("content_src")]
+        public string ContentSrc { get; set; }
+
+        [JsonProperty("content_src_medium")]
+        public string ContentSrcMedium { get; set; }
+
+        [JsonProperty("content_src_small")]
+        public string ContentSrcSmall { get; set; }
+
+        [JsonProperty("expires_at")]
+        public string ExpiresAt { get; set; }
+
     }
 }
