@@ -132,7 +132,7 @@ namespace Wikiled.FreeAgent.Client
 
         protected RestRequest CreatePutRequest(TSingle item)
         {
-            bool isNewRecord = string.IsNullOrEmpty(item.url);
+            bool isNewRecord = string.IsNullOrEmpty(item.Url);
             var request = CreateBasicRequest(isNewRecord ? Method.POST : Method.PUT, isNewRecord ? "" : "/{id}");
 
             if (item is IRemoveUrlOnSerialization || item is IRemoveRecurringOnSerialization)

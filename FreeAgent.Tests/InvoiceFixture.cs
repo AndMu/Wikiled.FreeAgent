@@ -36,14 +36,14 @@ namespace Wikiled.FreeAgent.Tests
 
         public override void CheckSingleItem(Invoice item)
         {
-            Assert.IsNotEmpty(item.url);
+            Assert.IsNotEmpty(item.Url);
             Assert.IsNotEmpty(item.invoice_items);
         }
 
         public override void CompareSingleItem(Invoice originalItem, Invoice newItem)
         {
             Assert.IsNotNull(newItem);
-            Assert.IsNotEmpty(newItem.url);
+            Assert.IsNotEmpty(newItem.Url);
         }
 
         public override void Configure()
@@ -72,7 +72,7 @@ namespace Wikiled.FreeAgent.Tests
 
             return new Invoice
                    {
-                       url = "",
+                       Url = "",
                        contact = contact.UrlId(),
                        status = InvoiceStatus.Draft,
                        dated_on = DateTime.Now.ModelDateTime(),

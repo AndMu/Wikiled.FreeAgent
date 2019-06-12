@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Wikiled.FreeAgent.TestApp": {
+      "commandName": "Project",
+      "commandLineArgs": "download -AppKey=\"UVzFkAOrDnN7GPQASQ5p6w\" -AppSecret=\"civXlmHsT11tAJPxuLZ6kw\" -Out=Forms"
+    }
+  }
+}

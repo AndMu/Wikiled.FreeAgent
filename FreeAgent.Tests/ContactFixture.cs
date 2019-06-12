@@ -19,13 +19,13 @@ namespace Wikiled.FreeAgent.Tests
 
         public override void CheckSingleItem(Contact item)
         {
-            Assert.IsNotEmpty(item.url);
+            Assert.IsNotEmpty(item.Url);
         }
 
         public override void CompareSingleItem(Contact originalItem, Contact newItem)
         {
             Assert.IsNotNull(newItem);
-            Assert.IsNotEmpty(newItem.url);
+            Assert.IsNotEmpty(newItem.Url);
             Assert.AreEqual(newItem.first_name, originalItem.first_name);
             Assert.AreEqual(newItem.last_name, originalItem.last_name);
             Assert.AreEqual(newItem.address1, originalItem.address1);
@@ -35,7 +35,7 @@ namespace Wikiled.FreeAgent.Tests
         {
             return Task.FromResult(new Contact
             {
-                url = "",
+                Url = "",
                 first_name = "Nic TEST",
                 last_name = "Wise",
                 organisation_name = "foo",

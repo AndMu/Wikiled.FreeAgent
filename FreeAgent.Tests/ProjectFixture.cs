@@ -21,7 +21,7 @@ namespace Wikiled.FreeAgent.Tests
 
         public override void CheckSingleItem(Project item)
         {
-            Assert.IsNotEmpty(item.url);
+            Assert.IsNotEmpty(item.Url);
             Assert.IsNotEmpty(item.name);
             Assert.IsNotEmpty(item.contact);
             Assert.IsNotEmpty(item.status);
@@ -30,7 +30,7 @@ namespace Wikiled.FreeAgent.Tests
         public override void CompareSingleItem(Project originalItem, Project newItem)
         {
             Assert.IsNotNull(newItem);
-            Assert.IsNotEmpty(newItem.url);
+            Assert.IsNotEmpty(newItem.Url);
             Assert.AreEqual(newItem.name, originalItem.name);
             Assert.AreEqual(newItem.status, originalItem.status);
             Assert.AreEqual(newItem.budget_units, originalItem.budget_units);
@@ -45,7 +45,7 @@ namespace Wikiled.FreeAgent.Tests
 
             return new Project
                    {
-                       url = "",
+                       Url = "",
                        contact = contact.UrlId(),
                        name = "project TEST",
                        status = ProjectStatus.Active,

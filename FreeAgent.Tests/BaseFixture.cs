@@ -22,9 +22,12 @@ namespace Wikiled.FreeAgent.Tests
             Configure();
 
             FreeAgentClient.UseSandbox = KeyStorage.UseSandbox;
-            if (KeyStorage.UseProxy) FreeAgentClient.Proxy = new WebProxy("127.0.0.1", 8888);
+            if (KeyStorage.UseProxy)
+            {
+                FreeAgentClient.Proxy = new WebProxy("127.0.0.1", 8888);
+            }
 
-            Client = new FreeAgentClient(new NullLogger<FreeAgentClient>(), KeyStorage.AppKey, KeyStorage.AppSecret);
+            Client = new FreeAgentClient(new NullLogger<FreeAgentClient>(), new AuthenticationData(KeyStorage.AppKey, KeyStorage.AppSecret));
 
             var sandboxTestToken = new AccessTokenData
                                        {

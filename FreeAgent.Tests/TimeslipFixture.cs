@@ -26,7 +26,7 @@ namespace Wikiled.FreeAgent.Tests
 
         public override void CheckSingleItem(Timeslip item)
         {
-            Assert.IsNotEmpty(item.url);
+            Assert.IsNotEmpty(item.Url);
             Assert.IsNotEmpty(item.dated_on);
             Assert.IsNotEmpty(item.project);
             Assert.IsNotEmpty(item.task);
@@ -36,7 +36,7 @@ namespace Wikiled.FreeAgent.Tests
         public override void CompareSingleItem(Timeslip originalItem, Timeslip newItem)
         {
             Assert.IsNotNull(newItem);
-            Assert.IsNotEmpty(newItem.url);
+            Assert.IsNotEmpty(newItem.Url);
             Assert.IsTrue(newItem.user.EndsWith(originalItem.user));
             Assert.IsTrue(newItem.project.EndsWith(originalItem.project));
             Assert.IsTrue(newItem.task.EndsWith(originalItem.task));
@@ -60,7 +60,7 @@ namespace Wikiled.FreeAgent.Tests
 
             return new Timeslip
                    {
-                       url = "",
+                       Url = "",
                        user = user.UrlId(),
                        project = project.UrlId(),
                        task = task.UrlId(),

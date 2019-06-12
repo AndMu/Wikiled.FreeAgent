@@ -1,24 +1,29 @@
 using System;
+using System.Globalization;
 using Wikiled.FreeAgent.Models;
 
 namespace Wikiled.FreeAgent.Extensions
 {
     public static class ModelExtensions
     {
-        public static DateTime FromModelDate(this string modeldate)
+        public static DateTime FromModelDate(this string modelDate)
         {
-            return DateTime.Parse(modeldate);
+            if (!DateTime.TryParseExact(modelDate , "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out var dateTime))
+            {
+                throw new ArgumentOutOfRangeException(nameof(modelDate));
+            }
+
+            return dateTime;
         }
 
         public static string Id(this BaseModel model)
         {
-            return StringId(model.url);
+            return StringId(model.Url);
         }
 
         public static int LocalId(this BaseModel model)
         {
-            int val = -1;
-            if (int.TryParse(model.Id(), out val))
+            if (int.TryParse(model.Id(), out var val))
             {
                 return val;
             }
@@ -26,10 +31,9 @@ namespace Wikiled.FreeAgent.Extensions
             return -1;
         }
 
-        public static int LocalId(this string idstring)
+        public static int LocalId(this string idString)
         {
-            int val = -1;
-            if (int.TryParse(StringId(idstring), out val))
+            if (int.TryParse(StringId(idString), out var val))
             {
                 return val;
             }
@@ -37,14 +41,14 @@ namespace Wikiled.FreeAgent.Extensions
             return -1;
         }
 
-        public static string ModelDate(this DateTime currentdate)
+        public static string ModelDate(this DateTime currentDate)
         {
-            return currentdate.ToString("yyyy-MM-dd");
+            return currentDate.ToString("yyyy-MM-dd");
         }
 
-        public static string ModelDateTime(this DateTime currentdate)
+        public static string ModelDateTime(this DateTime currentDate)
         {
-            return currentdate.ToString("s");
+            return currentDate.ToString("s");
         }
 
         public static UserPermission PermissionLevel(this User user)
@@ -54,7 +58,10 @@ namespace Wikiled.FreeAgent.Extensions
 
         public static string StringId(string url)
         {
-            if (string.IsNullOrEmpty(url)) return "";
+            if (string.IsNullOrEmpty(url))
+            {
+                return string.Empty;
+            }
 
             string[] elements = url.Split('/');
             return elements[elements.Length - 1];
@@ -62,26 +69,30 @@ namespace Wikiled.FreeAgent.Extensions
 
         public static string UrlId(this BaseModel model)
         {
-            if (string.IsNullOrEmpty(model.url)) return "";
+            if (string.IsNullOrEmpty(model.Url))
+            {
+                return string.Empty;
+            }
+
             try
             {
-                string[] elements = model.url.Split('/');
+                string[] elements = model.Url.Split('/');
                 return "/v2/{0}/{1}".Fmt(elements[elements.Length - 2], elements[elements.Length - 1]);
             }
             catch
             {
-                return "";
+                return string.Empty;
             }
         }
 
-        public static string UrlId(this string id, string resourcetype)
+        public static string UrlId(this string id, string resourceType)
         {
-            return "/v2/{0}/{1}".Fmt(resourcetype, id);
+            return "/v2/{0}/{1}".Fmt(resourceType, id);
         }
 
-        public static string UrlId(this int id, string resourcetype)
+        public static string UrlId(this int id, string resourceType)
         {
-            return "/v2/{0}/{1}".Fmt(resourcetype, id.ToString());
+            return "/v2/{0}/{1}".Fmt(resourceType, id.ToString());
         }
     }
 }

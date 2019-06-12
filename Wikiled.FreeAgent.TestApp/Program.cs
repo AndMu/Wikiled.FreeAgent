@@ -1,50 +1,46 @@
-﻿using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
+﻿using NLog.Extensions.Logging;
 using System;
-using System.IO;
-using System.Net;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Wikiled.Common.Logging;
-using Wikiled.Common.Utilities.Auth;
-using Wikiled.Console.Auth;
-using Wikiled.FreeAgent.Auth;
-using Wikiled.FreeAgent.Client;
+using Wikiled.Console.Arguments;
+using Wikiled.FreeAgent.TestApp.Commands;
+using Wikiled.FreeAgent.TestApp.Commands.Config;
 
 namespace Wikiled.FreeAgent.TestApp
 {
     public class Program
     {
-        public static async Task Main(string[] args)
+        private static Task task;
+
+        private static CancellationTokenSource source;
+
+        private static AutoStarter starter;
+
+        static async Task Main(string[] args)
         {
             NLog.LogManager.LoadConfiguration("nlog.config");
-            ApplicationLogging.LoggerFactory.AddNLog();
-            //FreeAgentClient.UseSandbox = true;
-            var client = new FreeAgentClient(new Logger<FreeAgentClient>(ApplicationLogging.LoggerFactory),
-                                             KeyStorage.AppKey,
-                                             KeyStorage.AppSecret);
-            var helper = new OAuthHelper(new Logger<OAuthHelper>(ApplicationLogging.LoggerFactory));
-            helper.RedirectUri = "http://localhost:9000";
-            var auth =
-                new PersistedAuthentication<AccessTokenData>(
-                    new Logger<PersistedAuthentication<AccessTokenData>>(ApplicationLogging.LoggerFactory),
-                    new ConsoleOAuthAuthentication<AccessTokenData>(client, helper));
-            await auth.Authenticate().ConfigureAwait(false);
-            
-            var banks = await client.BankAccount.All().ToArray();
-            var transactions = await client.BankTransactionExplanation.All(banks[3]).Where(item => item.Attachment != null).Take(10).ToArray();
+            starter = new AutoStarter(ApplicationLogging.LoggerFactory, "FreeAgent App", args);
+            starter.LoggerFactory.AddNLog();
+            starter.RegisterCommand<DownloadCommand, DownloadConfig>("download");
+            source = new CancellationTokenSource();
+            task = starter.StartAsync(source.Token);
+            System.Console.WriteLine("Please press CTRL+C to break...");
+            System.Console.CancelKeyPress += ConsoleOnCancelKeyPress;
+            await starter.Status.LastOrDefaultAsync();
+            System.Console.WriteLine("Exiting...");
+        }
 
-            var request = WebRequest.Create(new Uri(transactions[0].Attachment.ContentSrc));
-            using (WebResponse response = await request.GetResponseAsync().ConfigureAwait(false))
+        private static async void ConsoleOnCancelKeyPress(object sender, ConsoleCancelEventArgs e)
+        {
+            if (!task.IsCompleted)
             {
-                using (Stream stream = response.GetResponseStream())
-                {
-                    using (var file = new FileStream("file.pdf", FileMode.Create, FileAccess.Write))
-                    {
-                        stream.CopyTo(file);
-                    }
-                }
+                source.Cancel();
             }
+
+            source = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            await starter.StopAsync(source.Token).ConfigureAwait(false);
         }
     }
 }

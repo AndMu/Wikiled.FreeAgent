@@ -80,7 +80,7 @@ namespace Wikiled.FreeAgent.Tests
         public void CompareSingleItem(Task originalItem, Task newItem)
         {
             Assert.IsNotNull(newItem);
-            Assert.IsNotEmpty(newItem.url);
+            Assert.IsNotEmpty(newItem.Url);
 
             Assert.AreEqual(originalItem.name, newItem.name);
             Assert.AreEqual(originalItem.billing_period, newItem.billing_period);

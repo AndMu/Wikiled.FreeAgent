@@ -21,13 +21,13 @@ namespace Wikiled.FreeAgent.Tests
 
         public override void CheckSingleItem(Bill item)
         {
-            Assert.IsNotEmpty(item.url);
+            Assert.IsNotEmpty(item.Url);
         }
 
         public override void CompareSingleItem(Bill originalItem, Bill newItem)
         {
             Assert.IsNotNull(newItem);
-            Assert.IsNotEmpty(newItem.url);
+            Assert.IsNotEmpty(newItem.Url);
             Assert.AreEqual(newItem.status, originalItem.status);
 
             //Assert.AreEqual(newItem.user, originalItem.user);
@@ -41,7 +41,7 @@ namespace Wikiled.FreeAgent.Tests
 
             return new Bill
                    {
-                       url = "",
+                       Url = "",
                        dated_on = DateTime.Now.ModelDate(),
                        category = cat.UrlId()
 

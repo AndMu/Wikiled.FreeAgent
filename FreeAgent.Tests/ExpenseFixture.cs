@@ -21,13 +21,13 @@ namespace Wikiled.FreeAgent.Tests
 
         public override void CheckSingleItem(Expense item)
         {
-            Assert.IsNotEmpty(item.url);
+            Assert.IsNotEmpty(item.Url);
         }
 
         public override void CompareSingleItem(Expense originalItem, Expense newItem)
         {
             Assert.IsNotNull(newItem);
-            Assert.IsNotEmpty(newItem.url);
+            Assert.IsNotEmpty(newItem.Url);
             Assert.AreEqual(newItem.description, originalItem.description);
 
             //Assert.AreEqual(newItem.user, originalItem.user);
@@ -41,7 +41,7 @@ namespace Wikiled.FreeAgent.Tests
 
             return new Expense
                    {
-                       url = "",
+                       Url = "",
                        user = user.UrlId(),
                        gross_value = 100.00,
                        description = "Expense TEST",

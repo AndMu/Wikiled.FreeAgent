@@ -4,9 +4,9 @@ namespace Wikiled.FreeAgent.Models
     {
         public BaseModel()
         {
-            url = "";
+            Url = string.Empty;
         }
 
-        public string url { get; set; }
+        public string Url { get; set; }
     }
 }

@@ -21,7 +21,7 @@ namespace Wikiled.FreeAgent.Client
                 throw new ArgumentNullException(nameof(account));
             }
 
-            return All(r => { r.AddParameter("bank_account", account.url, ParameterType.GetOrPost); });
+            return All(r => { r.AddParameter("bank_account", account.Url, ParameterType.GetOrPost); });
         }
 
         public override List<BankTransactionExplanation> ListFromWrapper(BankTransactionExplanationsWrapper wrapper)

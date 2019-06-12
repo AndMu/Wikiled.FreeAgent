@@ -12,7 +12,7 @@ using Wikiled.FreeAgent.Helpers;
 
 namespace Wikiled.FreeAgent.Client
 {
-    public class FreeAgentClient : IAuthClient<AccessTokenData>
+    public class FreeAgentClient : IAuthClient<AccessTokenData>, IFreeAgentClient
     {
         public const string Version = "2";
 
@@ -22,22 +22,18 @@ namespace Wikiled.FreeAgent.Client
 
         public static WebProxy Proxy = null;
 
-        private readonly string apiKey;
-
-        private readonly string appsecret;
-
         private readonly ILogger<FreeAgentClient> logger;
+
+        private readonly AuthenticationData auth;
 
         private AccessTokenData currentAccessToken;
 
         private RestClient restClient;
 
-
-        public FreeAgentClient(ILogger<FreeAgentClient> logger, string apiKey, string appSecret)
+        public FreeAgentClient(ILogger<FreeAgentClient> logger, AuthenticationData auth)
         {
-            this.apiKey = apiKey;
-            appsecret = appSecret;
-            this.logger = logger;
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.auth = auth ?? throw new ArgumentNullException(nameof(auth));
             LoadClient();
         }
 
@@ -97,7 +93,7 @@ namespace Wikiled.FreeAgent.Client
 
             var request = Helper.CreateRefreshTokenRequest(token);
             var response = await Execute<AccessTokenData>(request).ConfigureAwait(false);
-
+            CurrentAccessToken = null;
             if (response != null && !string.IsNullOrEmpty(response.AccessToken))
             {
                 token.AccessToken = response.AccessToken;
@@ -114,7 +110,7 @@ namespace Wikiled.FreeAgent.Client
         {
             //Go 1-Liner!
             return
-                $"{BaseUrl}/v{Version}/approve_app?response_type=code&client_id={apiKey}{(string.IsNullOrEmpty(callback) ? string.Empty : "&redirect_uri=" + callback.UrlEncode())}&state=foo";
+                $"{BaseUrl}/v{Version}/approve_app?response_type=code&client_id={auth.ApiKey}{(string.IsNullOrEmpty(callback) ? string.Empty : "&redirect_uri=" + callback.UrlEncode())}&state=foo";
         }
 
         public async Task<AccessTokenData> GetToken(string code, string redirectUri = null)
@@ -152,9 +148,8 @@ namespace Wikiled.FreeAgent.Client
             restClient.ClearHandlers();
             restClient.AddHandler("application/json", () => new JsonDeserializer());
             Helper = new RequestHelper(Version);
-            Helper.ApiKey = apiKey;
-            Helper.ApiSecret = appsecret;
-
+            Helper.ApiKey = auth.ApiKey;
+            Helper.ApiSecret = auth.AppSecret;
             SetProxy();
             SetupClients();
         }

@@ -19,7 +19,7 @@ namespace Wikiled.FreeAgent.Tests
 
         public override void CheckSingleItem(BankAccount item)
         {
-            Assert.IsNotEmpty(item.url);
+            Assert.IsNotEmpty(item.Url);
             Assert.IsNotEmpty(item.type);
             Assert.IsNotEmpty(item.name);
             Assert.IsNotEmpty(item.bank_name);
@@ -28,7 +28,7 @@ namespace Wikiled.FreeAgent.Tests
         public override void CompareSingleItem(BankAccount originalItem, BankAccount newItem)
         {
             Assert.IsNotNull(newItem);
-            Assert.IsNotEmpty(newItem.url);
+            Assert.IsNotEmpty(newItem.Url);
             Assert.AreEqual(newItem.account_number, originalItem.account_number);
             Assert.AreEqual(newItem.type, originalItem.type);
             Assert.AreEqual(newItem.opening_balance, originalItem.opening_balance);
@@ -38,7 +38,7 @@ namespace Wikiled.FreeAgent.Tests
         {
             return Task.FromResult(new BankAccount
             {
-                url = "",
+                Url = "",
                 opening_balance = 100,
                 type = BankAccountType.StandardBankAccount,
                 name = "Bank Account TEST " + DateTime.Now,

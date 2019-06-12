@@ -27,36 +27,31 @@ namespace Wikiled.FreeAgent.Tests
         {
             FreeAgentClient.UseSandbox = true;
 
-            var sandbox_bttest_token = new AccessTokenData
-                                       {
-                                           AccessToken = "",
-                                           RefreshToken = KeyStorage.RefreshToken,
-                                           TokenType = "bearer"
-                                       };
-
+            var sandboxBttestToken = new AccessTokenData
             {
-                var Client = new FreeAgentClient(new NullLogger<FreeAgentClient>(), KeyStorage.AppKey, KeyStorage.AppSecret);
+                AccessToken = "",
+                RefreshToken = KeyStorage.RefreshToken,
+                TokenType = "bearer"
+            };
 
-                Client.CurrentAccessToken = sandbox_bttest_token;
-
-                try
-                {
-                    var co = Client.Company.Single();
-                }
-                catch
-                {
-                }
-            }
-
-            FreeAgentClient.UseSandbox = false;
-
-            var LiveClient = new FreeAgentClient(new NullLogger<FreeAgentClient>(), KeyStorage.AppKey, KeyStorage.AppSecret);
-
-            LiveClient.CurrentAccessToken = sandbox_bttest_token;
+            var client = new FreeAgentClient(new NullLogger<FreeAgentClient>(), new AuthenticationData(KeyStorage.AppKey, KeyStorage.AppSecret));
+            client.CurrentAccessToken = sandboxBttestToken;
 
             try
             {
-                var co = LiveClient.Company.Single();
+                var co = client.Company.Single();
+            }
+            catch
+            {
+            }
+
+            FreeAgentClient.UseSandbox = false;
+            var liveClient = new FreeAgentClient(new NullLogger<FreeAgentClient>(), new AuthenticationData(KeyStorage.AppKey, KeyStorage.AppSecret));
+            liveClient.CurrentAccessToken = sandboxBttestToken;
+
+            try
+            {
+                var co = liveClient.Company.Single();
             }
             catch
             {
