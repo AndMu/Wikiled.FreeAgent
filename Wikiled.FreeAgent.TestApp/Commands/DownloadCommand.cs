@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Wikiled.Common.Extensions;
 using Wikiled.Common.Utilities.Auth;
+using Wikiled.Common.Utilities.Serialization;
 using Wikiled.Console.Arguments;
 using Wikiled.FreeAgent.Auth;
 using Wikiled.FreeAgent.Client;
@@ -26,7 +27,9 @@ namespace Wikiled.FreeAgent.TestApp.Commands
 
         private readonly IFreeAgentClient client;
 
-        private DownloadConfig config;
+        private readonly DownloadConfig config;
+
+        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
 
         public DownloadCommand(ILogger<DownloadCommand> logger, IFreeAgentClient client, IAuthentication<AccessTokenData> auth, DownloadConfig config)
             : base(logger)
@@ -51,7 +54,7 @@ namespace Wikiled.FreeAgent.TestApp.Commands
                     .Where(item => item.Attachment != null)
                     .Select(ProcessBankTransaction)
                     .Merge()
-                    .LastAsync();
+                    .LastOrDefaultAsync();
             }
         }
 
@@ -59,19 +62,28 @@ namespace Wikiled.FreeAgent.TestApp.Commands
         {
             try
             {
+                await semaphore.WaitAsync().ConfigureAwait(false);
                 var request = WebRequest.Create(new Uri(transaction.Attachment.ContentSrc));
+                var id = transaction.LocalId();
+
                 var transactionId = transaction.BankTransaction.LocalId();
                 var bankId = transaction.BankAccount.LocalId();
-                var dateTime = transaction.DatedOn.FromModelDate(); ;
+                var dateTime = transaction.DatedOn.FromModelDate();
+                ;
                 var dateStr = dateTime.ToString("yyyy MMMM dd");
-                logger.LogDebug("Downloading: {1} {0}", transactionId, dateTime);
+                logger.LogDebug("Downloading: Id {0} Transaction: {1} (Bank: {2}) Date: {3}",
+                                id,
+                                transactionId,
+                                bankId,
+                                dateTime);
 
                 using (WebResponse response = await request.GetResponseAsync().ConfigureAwait(false))
                 {
-                    
                     using (Stream stream = response.GetResponseStream())
                     {
-                        using (var file = new FileStream($@"{config.Out}\{bankId}\{dateStr}_{transactionId}_file.pdf", FileMode.Create, FileAccess.Write))
+                        var fileName = $@"{config.Out}\{bankId}\{dateStr}_{id}_{transactionId}";
+                        await transaction.SerializeJsonZip($"{fileName}_data.zip").ConfigureAwait(false);
+                        using (var file = new FileStream($@"{fileName}_file.pdf", FileMode.Create, FileAccess.Write))
                         {
                             stream.CopyTo(file);
                         }
@@ -82,6 +94,10 @@ namespace Wikiled.FreeAgent.TestApp.Commands
             catch (Exception e)
             {
                 logger.LogError(e, "Download failed");
+            }
+            finally
+            {
+                semaphore.Release();
             }
 
             return transaction;
