@@ -30,11 +30,11 @@ namespace Wikiled.FreeAgent.Tests
             var sandboxBttestToken = new AccessTokenData
             {
                 AccessToken = "",
-                RefreshToken = KeyStorage.RefreshToken,
+                RefreshToken = FreeAgentKeyStorage.RefreshToken,
                 TokenType = "bearer"
             };
 
-            var client = new FreeAgentClient(new NullLogger<FreeAgentClient>(), new AuthenticationData(KeyStorage.AppKey, KeyStorage.AppSecret));
+            var client = new FreeAgentClient(new NullLogger<FreeAgentClient>(), new AuthenticationData(FreeAgentKeyStorage.AppKey, FreeAgentKeyStorage.AppSecret));
             client.CurrentAccessToken = sandboxBttestToken;
 
             try
@@ -46,7 +46,7 @@ namespace Wikiled.FreeAgent.Tests
             }
 
             FreeAgentClient.UseSandbox = false;
-            var liveClient = new FreeAgentClient(new NullLogger<FreeAgentClient>(), new AuthenticationData(KeyStorage.AppKey, KeyStorage.AppSecret));
+            var liveClient = new FreeAgentClient(new NullLogger<FreeAgentClient>(), new AuthenticationData(FreeAgentKeyStorage.AppKey, FreeAgentKeyStorage.AppSecret));
             liveClient.CurrentAccessToken = sandboxBttestToken;
 
             try

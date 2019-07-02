@@ -21,18 +21,18 @@ namespace Wikiled.FreeAgent.Tests
         {
             Configure();
 
-            FreeAgentClient.UseSandbox = KeyStorage.UseSandbox;
-            if (KeyStorage.UseProxy)
+            FreeAgentClient.UseSandbox = FreeAgentKeyStorage.UseSandbox;
+            if (FreeAgentKeyStorage.UseProxy)
             {
                 FreeAgentClient.Proxy = new WebProxy("127.0.0.1", 8888);
             }
 
-            Client = new FreeAgentClient(new NullLogger<FreeAgentClient>(), new AuthenticationData(KeyStorage.AppKey, KeyStorage.AppSecret));
+            Client = new FreeAgentClient(new NullLogger<FreeAgentClient>(), new AuthenticationData(FreeAgentKeyStorage.AppKey, FreeAgentKeyStorage.AppSecret));
 
             var sandboxTestToken = new AccessTokenData
                                        {
                                            AccessToken = "",
-                                           RefreshToken = KeyStorage.RefreshToken,
+                                           RefreshToken = FreeAgentKeyStorage.RefreshToken,
                                            TokenType = "bearer"
                                        };
 
