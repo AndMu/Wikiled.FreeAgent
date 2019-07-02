@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
-using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Reactive.Linq;
@@ -69,7 +68,7 @@ namespace Wikiled.FreeAgent.TestApp.Commands
                 var transactionId = transaction.BankTransaction.LocalId();
                 var bankId = transaction.BankAccount.LocalId();
                 var dateTime = transaction.DatedOn.FromModelDate();
-                ;
+                
                 var dateStr = dateTime.ToString("yyyy MMMM dd");
                 logger.LogDebug("Downloading: Id {0} Transaction: {1} (Bank: {2}) Date: {3}",
                                 id,
